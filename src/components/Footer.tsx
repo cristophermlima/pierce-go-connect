@@ -1,7 +1,22 @@
 
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "@/components/ui/sonner";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Por favor, informe um email válido.");
+      return;
+    }
+    
+    toast.success("Inscrição realizada com sucesso!");
+    setEmail("");
+  };
+
   return (
     <footer className="border-t border-border bg-background/50 py-12 mt-auto">
       <div className="container grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-6">
@@ -25,9 +40,9 @@ export default function Footer() {
           <h3 className="font-semibold mb-3">Links Úteis</h3>
           <ul className="space-y-2">
             <li><Link to="/eventos" className="text-muted-foreground hover:text-primary">Todos os Eventos</Link></li>
-            <li><Link to="/avaliações" className="text-muted-foreground hover:text-primary">Avaliações</Link></li>
+            <li><Link to="/avaliacoes" className="text-muted-foreground hover:text-primary">Avaliações</Link></li>
             <li><Link to="/planos" className="text-muted-foreground hover:text-primary">Nossos Planos</Link></li>
-            <li><Link to="/contato" className="text-muted-foreground hover:text-primary">Contato</Link></li>
+            <li><Link to="/cadastro" className="text-muted-foreground hover:text-primary">Cadastrar Evento/Loja</Link></li>
           </ul>
         </div>
         <div>
@@ -35,16 +50,21 @@ export default function Footer() {
           <p className="text-sm text-muted-foreground mb-3">
             Inscreva-se para receber atualizações sobre eventos em sua região.
           </p>
-          <div className="flex">
+          <form onSubmit={handleNewsletterSubmit} className="flex">
             <input 
               type="email" 
               placeholder="Seu e-mail" 
               className="bg-muted border border-border rounded-l-md px-3 py-2 w-full outline-none focus:ring-1 focus:ring-primary"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <button className="bg-primary rounded-r-md px-4 py-2 hover:bg-primary/90 transition-colors">
+            <button 
+              type="submit" 
+              className="bg-primary rounded-r-md px-4 py-2 hover:bg-primary/90 transition-colors"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
             </button>
-          </div>
+          </form>
         </div>
       </div>
       <div className="container border-t border-border mt-8 pt-6 px-4 md:px-6">

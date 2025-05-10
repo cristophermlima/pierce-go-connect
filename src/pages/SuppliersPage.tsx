@@ -1,10 +1,23 @@
 
+import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import AddEvaluationForm from "@/components/AddEvaluationForm";
 
 export default function SuppliersPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
+  const [currentSupplier, setCurrentSupplier] = useState<string | null>(null);
+
+  const handleOpenEvaluationDialog = (supplierName: string) => {
+    setCurrentSupplier(supplierName);
+    setShowEvaluationDialog(true);
+  };
+
   return (
     <MainLayout>
       <div className="container py-10">
@@ -22,6 +35,8 @@ export default function SuppliersPage() {
               <Input 
                 className="pl-10" 
                 placeholder="Buscar fornecedores..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             
@@ -30,22 +45,46 @@ export default function SuppliersPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M3 6h18"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>
                 Filtrar
               </Button>
-              <Button variant="outline" className="flex-1 md:flex-none">
+              <Button 
+                variant="outline" 
+                className="flex-1 md:flex-none"
+                onClick={() => handleOpenEvaluationDialog("Avaliar Fornecedor")}
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.3-4.3"></path><path d="M11 8v6"></path><path d="M8 11h6"></path></svg>
                 Avaliar Fornecedor
-              </Button>
-              <Button className="flex-1 md:flex-none bg-gradient-to-r from-piercing-purple to-piercing-pink">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M11 8v6"></path><path d="M8 11h6"></path><circle cx="12" cy="12" r="10"></circle></svg>
-                Adicionar Fornecedor
               </Button>
             </div>
           </div>
           
           <div className="mb-6 flex flex-wrap gap-2">
-            <Button variant="secondary" className="rounded-full">Todos</Button>
-            <Button variant="ghost" className="rounded-full">Joias e Acessórios</Button>
-            <Button variant="ghost" className="rounded-full">Equipamentos</Button>
-            <Button variant="ghost" className="rounded-full">Descartáveis</Button>
+            <Button 
+              variant={activeCategory === "Todos" ? "secondary" : "ghost"} 
+              className="rounded-full"
+              onClick={() => setActiveCategory("Todos")}
+            >
+              Todos
+            </Button>
+            <Button 
+              variant={activeCategory === "Joias e Acessórios" ? "secondary" : "ghost"} 
+              className="rounded-full"
+              onClick={() => setActiveCategory("Joias e Acessórios")}
+            >
+              Joias e Acessórios
+            </Button>
+            <Button 
+              variant={activeCategory === "Equipamentos" ? "secondary" : "ghost"} 
+              className="rounded-full"
+              onClick={() => setActiveCategory("Equipamentos")}
+            >
+              Equipamentos
+            </Button>
+            <Button 
+              variant={activeCategory === "Descartáveis" ? "secondary" : "ghost"} 
+              className="rounded-full"
+              onClick={() => setActiveCategory("Descartáveis")}
+            >
+              Descartáveis
+            </Button>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -92,7 +131,14 @@ export default function SuppliersPage() {
                 rating: "4.8",
                 reviews: "33"
               }
-            ].map((supplier, i) => (
+            ]
+            .filter(supplier => 
+              (activeCategory === "Todos" || supplier.type.includes(activeCategory)) &&
+              (searchQuery === "" || 
+                supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                supplier.location.toLowerCase().includes(searchQuery.toLowerCase()))
+            )
+            .map((supplier, i) => (
               <SupplierCard 
                 key={i}
                 name={supplier.name}
@@ -100,11 +146,31 @@ export default function SuppliersPage() {
                 location={supplier.location}
                 rating={supplier.rating}
                 reviews={supplier.reviews}
+                onEvaluate={() => handleOpenEvaluationDialog(supplier.name)}
               />
             ))}
           </div>
         </div>
       </div>
+
+      {/* Add Evaluation Dialog */}
+      <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {currentSupplier === "Avaliar Fornecedor" ? "Avaliar Fornecedor" : `Avaliar ${currentSupplier}`}
+            </DialogTitle>
+            <DialogDescription>
+              Compartilhe sua experiência com a comunidade.
+            </DialogDescription>
+          </DialogHeader>
+          <AddEvaluationForm 
+            type="supplier" 
+            onSubmit={() => setShowEvaluationDialog(false)}
+            onCancel={() => setShowEvaluationDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }
@@ -115,9 +181,10 @@ interface SupplierCardProps {
   location: string;
   rating: string;
   reviews: string;
+  onEvaluate: () => void;
 }
 
-function SupplierCard({ name, type, location, rating, reviews }: SupplierCardProps) {
+function SupplierCard({ name, type, location, rating, reviews, onEvaluate }: SupplierCardProps) {
   return (
     <Card className="overflow-hidden border-border/30 bg-card/80 backdrop-blur-sm">
       <div className="h-48 bg-muted flex items-center justify-center">
@@ -139,7 +206,16 @@ function SupplierCard({ name, type, location, rating, reviews }: SupplierCardPro
           <div className="text-muted-foreground text-sm">({reviews})</div>
         </div>
         
-        <Button variant="outline" className="w-full mt-4">Ver Detalhes</Button>
+        <div className="flex flex-col gap-2 mt-4">
+          <Button variant="outline" className="w-full">Ver Detalhes</Button>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={onEvaluate}
+          >
+            Avaliar
+          </Button>
+        </div>
       </div>
     </Card>
   );
