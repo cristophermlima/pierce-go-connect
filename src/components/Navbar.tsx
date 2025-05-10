@@ -35,17 +35,23 @@ export default function Navbar() {
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link to="/eventos" className="text-lg font-medium hover:text-primary transition-colors">
-            Eventos
+            Agenda
           </Link>
-          <Link to="/avaliações" className="text-lg font-medium hover:text-primary transition-colors">
-            Avaliações
+          <Link to="/avaliacoes" className="text-lg font-medium hover:text-primary transition-colors">
+            Score Piercing
           </Link>
-          <Link to="/planos" className="text-lg font-medium hover:text-primary transition-colors">
-            Planos
+          <Link to="/viagens" className="text-lg font-medium hover:text-primary transition-colors">
+            Viagens
           </Link>
-          <Link to="/login">
-            <Button className="button-glow bg-gradient-to-r from-piercing-purple to-piercing-blue">
-              Login
+          <Link to="/fornecedores" className="text-lg font-medium hover:text-primary transition-colors">
+            Fornecedores
+          </Link>
+          <Link to="/login" className="text-lg font-medium hover:text-primary transition-colors">
+            Entrar
+          </Link>
+          <Link to="/cadastro">
+            <Button className="button-glow bg-gradient-to-r from-piercing-purple to-piercing-pink">
+              Cadastrar
             </Button>
           </Link>
         </nav>
@@ -59,28 +65,42 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-2 text-lg hover:bg-muted rounded-md"
               >
-                Eventos
+                Agenda
               </Link>
               <Link 
-                to="/avaliações"
+                to="/avaliacoes"
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-2 text-lg hover:bg-muted rounded-md"
               >
-                Avaliações
+                Score Piercing
               </Link>
               <Link 
-                to="/planos"
+                to="/viagens"
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-2 text-lg hover:bg-muted rounded-md"
               >
-                Planos
+                Viagens
+              </Link>
+              <Link 
+                to="/fornecedores"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
+              >
+                Fornecedores
               </Link>
               <Link 
                 to="/login"
                 onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
               >
-                <Button className="w-full bg-gradient-to-r from-piercing-purple to-piercing-blue">
-                  Login
+                Entrar
+              </Link>
+              <Link 
+                to="/cadastro"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                  Cadastrar
                 </Button>
               </Link>
             </div>
