@@ -60,9 +60,10 @@ export default {
         piercing: {
           purple: "#9b87f5",
           blue: "#0EA5E9", 
-          pink: "#D946EF",
+          pink: "#e91e63",
           red: "#ea384c"
-        }
+        },
+        black: "#000000"
       },
       borderRadius: {
         lg: "var(--radius)",
