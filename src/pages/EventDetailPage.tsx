@@ -4,10 +4,16 @@ import { useParams } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ReviewsList from "@/components/ReviewsList";
+import AddEvaluationForm from "@/components/AddEvaluationForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 
 export default function EventDetailPage() {
   const { id } = useParams();
   const [isSaved, setIsSaved] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
   
   // Mock data for a single event based on the image provided
   const event = {
@@ -40,7 +46,34 @@ export default function EventDetailPage() {
     // In a real app, we would implement sharing functionality
     console.log("Compartilhar evento:", event.title);
     // For now, let's show a toast instead
-    alert("Link copiado para a área de transferência!");
+    toast("Link copiado para a área de transferência!");
+  };
+
+  const openEvaluationDialog = () => {
+    setShowEvaluationDialog(true);
+  };
+
+  const closeEvaluationDialog = () => {
+    setShowEvaluationDialog(false);
+  };
+
+  const handleSubmitEvaluation = (data: any) => {
+    const newReview = {
+      id: `review-${Date.now()}`,
+      author: data.name || "Usuário anônimo",
+      date: new Date().toLocaleDateString('pt-BR'),
+      rating: data.rating,
+      comment: data.comment,
+      technicalRating: data.technicalRating,
+      ethicalRating: data.ethicalRating,
+      diplomaticRating: data.diplomaticRating,
+      helpful: 0,
+      images: data.images || []
+    };
+
+    setReviews([newReview, ...reviews]);
+    closeEvaluationDialog();
+    toast.success("Avaliação enviada com sucesso!");
   };
 
   return (
@@ -135,12 +168,11 @@ export default function EventDetailPage() {
                   </TabsContent>
                   
                   <TabsContent value="avaliacoes">
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">Ainda não há avaliações para este evento.</p>
-                      <Button className="mt-4 bg-primary hover:bg-primary/90">
-                        Seja o primeiro a avaliar
-                      </Button>
-                    </div>
+                    <ReviewsList 
+                      type="event" 
+                      reviews={reviews} 
+                      onAddReview={openEvaluationDialog} 
+                    />
                   </TabsContent>
                 </Tabs>
               </div>
@@ -212,6 +244,17 @@ export default function EventDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Evaluation Dialog */}
+      <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <AddEvaluationForm 
+            type="event" 
+            onSubmit={handleSubmitEvaluation} 
+            onCancel={closeEvaluationDialog} 
+          />
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

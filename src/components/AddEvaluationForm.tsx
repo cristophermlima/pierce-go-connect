@@ -11,6 +11,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
+import { X } from "lucide-react";
 
 interface AddEvaluationFormProps {
   type: "event" | "supplier";
@@ -20,9 +21,17 @@ interface AddEvaluationFormProps {
 
 export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvaluationFormProps) {
   const [rating, setRating] = useState(0);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [comment, setComment] = useState("");
+  const [technicalRating, setTechnicalRating] = useState(0);
+  const [ethicalRating, setEthicalRating] = useState(0);
+  const [diplomaticRating, setDiplomaticRating] = useState(0);
   const [organizationRating, setOrganizationRating] = useState(0);
   const [locationRating, setLocationRating] = useState(0);
   const [valueRating, setValueRating] = useState(0);
+  const [images, setImages] = useState<File[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,14 +48,19 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvalu
       // In a real app, we would submit to an API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast.success(`${type === "event" ? "Evento" : "Fornecedor"} avaliado com sucesso!`);
-      
       if (onSubmit) {
         onSubmit({
+          name,
+          email,
           rating,
-          organizationRating,
-          locationRating,
-          valueRating
+          comment,
+          technicalRating: type === "event" ? technicalRating : undefined,
+          ethicalRating: type === "event" ? ethicalRating : undefined,
+          diplomaticRating: type === "event" ? diplomaticRating : undefined,
+          organizationRating: type === "supplier" ? organizationRating : undefined,
+          locationRating: type === "supplier" ? locationRating : undefined,
+          valueRating: type === "supplier" ? valueRating : undefined,
+          images: previewImages
         });
       }
     } catch (error) {
@@ -55,6 +69,29 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvalu
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const fileArray = Array.from(e.target.files).slice(0, 5); // Limit to 5 files
+      setImages([...images, ...fileArray]);
+      
+      // Create preview URLs
+      const newPreviewUrls = fileArray.map(file => URL.createObjectURL(file));
+      setPreviewImages([...previewImages, ...newPreviewUrls]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+
+    const newPreviews = [...previewImages];
+    // Revoke the object URL to free memory
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    setPreviewImages(newPreviews);
   };
 
   const StarRating = ({ value, onChange }: { value: number, onChange: (value: number) => void }) => {
@@ -88,58 +125,22 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvalu
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">O que você está avaliando?</label>
-            <Select defaultValue={type}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma opção" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="event">Evento</SelectItem>
-                <SelectItem value="supplier">Fornecedor</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {type === "supplier" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Nome do Fornecedor</label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um fornecedor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="revolution">Revolution Piercing</SelectItem>
-                  <SelectItem value="angel">Angel Piercing</SelectItem>
-                  <SelectItem value="my-piercing">My Piercing</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {type === "event" && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Nome do Evento</label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um evento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gep">GEP - Grupo de Estudos em Piercing</SelectItem>
-                  <SelectItem value="expo">Expo Piercing Brasil</SelectItem>
-                  <SelectItem value="workshop">Workshop Técnicas Avançadas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          
-          <div>
             <label className="block text-sm font-medium mb-1">Seu Nome (opcional)</label>
-            <Input placeholder="Deixe em branco para avaliar anonimamente" />
+            <Input 
+              placeholder="Deixe em branco para avaliar anonimamente" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1">Seu Email (opcional)</label>
-            <Input placeholder="Não será exibido publicamente" type="email" />
+            <Input 
+              placeholder="Não será exibido publicamente" 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           
           <div>
@@ -147,33 +148,77 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvalu
             <StarRating value={rating} onChange={setRating} />
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Organização</label>
-              <StarRating value={organizationRating} onChange={setOrganizationRating} />
+          {type === "event" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Técnica</label>
+                <StarRating value={technicalRating} onChange={setTechnicalRating} />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Ética</label>
+                <StarRating value={ethicalRating} onChange={setEthicalRating} />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Diplomacia</label>
+                <StarRating value={diplomaticRating} onChange={setDiplomaticRating} />
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Localização</label>
-              <StarRating value={locationRating} onChange={setLocationRating} />
+          )}
+          
+          {type === "supplier" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Organização</label>
+                <StarRating value={organizationRating} onChange={setOrganizationRating} />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Localização</label>
+                <StarRating value={locationRating} onChange={setLocationRating} />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Valor</label>
+                <StarRating value={valueRating} onChange={setValueRating} />
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">Valor</label>
-              <StarRating value={valueRating} onChange={setValueRating} />
-            </div>
-          </div>
+          )}
           
           <div>
             <label className="block text-sm font-medium mb-1">Sua Experiência</label>
             <Textarea 
               placeholder="Descreva sua experiência em detalhes. O que você gostou? O que poderia ser melhorado?" 
               className="h-32"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
             />
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-2">Adicionar Fotos (opcional)</label>
+            {previewImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {previewImages.map((src, index) => (
+                  <div key={index} className="relative">
+                    <img 
+                      src={src} 
+                      alt={`Prévia ${index + 1}`} 
+                      className="h-16 w-16 object-cover rounded" 
+                    />
+                    <button
+                      type="button"
+                      className="absolute -top-2 -right-2 bg-red-500 rounded-full p-0.5"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X size={14} className="text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
               <div className="flex justify-center mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground mx-auto" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -183,21 +228,46 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel }: AddEvalu
                 </svg>
               </div>
               <p className="text-sm text-muted-foreground mb-3">Arraste e solte suas fotos aqui</p>
-              <Button type="button" variant="outline" className="text-sm">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="text-sm"
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
                 Selecionar Fotos
               </Button>
-              <p className="text-xs text-muted-foreground mt-2">Máximo de 5 fotos, até 2MB cada</p>
+              <input
+                id="file-upload"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={previewImages.length >= 5}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                {previewImages.length}/5 fotos selecionadas (máximo de 2MB cada)
+              </p>
             </div>
           </div>
         </div>
         
-        <Button 
-          type="submit" 
-          className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Enviando..." : "Enviar Avaliação"}
-        </Button>
+        <div className="flex gap-3 justify-end">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={onCancel}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enviando..." : "Enviar Avaliação"}
+          </Button>
+        </div>
       </form>
     </div>
   );
