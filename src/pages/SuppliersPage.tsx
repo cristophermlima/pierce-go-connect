@@ -5,15 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 import AddEvaluationForm from "@/components/AddEvaluationForm";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 export default function SuppliersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
   const [currentSupplier, setCurrentSupplier] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const { user } = useAuth();
 
   const handleOpenEvaluationDialog = (supplierName: string) => {
+    if (!user) {
+      toast.error("Você precisa estar logado para avaliar um fornecedor");
+      return;
+    }
     setCurrentSupplier(supplierName);
     setShowEvaluationDialog(true);
   };
@@ -154,8 +164,11 @@ export default function SuppliersPage() {
       </div>
 
       {/* Add Evaluation Dialog */}
-      <Dialog open={showEvaluationDialog} onOpenChange={setShowEvaluationDialog}>
-        <DialogContent className="max-w-2xl">
+      <Dialog 
+        open={showEvaluationDialog} 
+        onOpenChange={setShowEvaluationDialog}
+      >
+        <DialogContent className={`max-w-2xl ${isMobile ? 'p-4' : ''}`}>
           <DialogHeader>
             <DialogTitle>
               {currentSupplier === "Avaliar Fornecedor" ? "Avaliar Fornecedor" : `Avaliar ${currentSupplier}`}

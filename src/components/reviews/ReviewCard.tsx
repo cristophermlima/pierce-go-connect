@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StarRating, CategoryStarRating } from "./StarRating";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface Review {
   id: string;
@@ -42,7 +43,7 @@ export function ReviewCard({ review, type }: ReviewCardProps) {
       </div>
       
       {type === "event" && (review.technicalRating || review.ethicalRating || review.diplomaticRating) && (
-        <div className="grid grid-cols-3 gap-2 my-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 my-3">
           {review.technicalRating && (
             <CategoryStarRating rating={review.technicalRating} label="Técnica" />
           )}
@@ -58,7 +59,7 @@ export function ReviewCard({ review, type }: ReviewCardProps) {
       )}
       
       {type === "supplier" && (review.organizationRating || review.locationRating || review.valueRating) && (
-        <div className="grid grid-cols-3 gap-2 my-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 my-3">
           {review.organizationRating && (
             <CategoryStarRating rating={review.organizationRating} label="Organização" />
           )}
@@ -76,16 +77,18 @@ export function ReviewCard({ review, type }: ReviewCardProps) {
       <p className="my-3">{review.comment}</p>
       
       {review.images && review.images.length > 0 && (
-        <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
-          {review.images.map((image, index) => (
-            <img 
-              key={index} 
-              src={image} 
-              alt={`Imagem ${index + 1}`} 
-              className="h-16 w-16 object-cover rounded"
-            />
-          ))}
-        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+            {review.images.map((image, index) => (
+              <img 
+                key={index} 
+                src={image} 
+                alt={`Imagem ${index + 1}`} 
+                className="h-16 w-16 object-cover rounded"
+              />
+            ))}
+          </div>
+        </ScrollArea>
       )}
       
       <div className="flex justify-between items-center mt-4 pt-2 border-t border-border/30">
