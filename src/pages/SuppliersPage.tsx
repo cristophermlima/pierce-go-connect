@@ -22,6 +22,7 @@ export default function SuppliersPage() {
   const handleOpenEvaluationDialog = (supplierName: string) => {
     if (!user) {
       toast.error("Você precisa estar logado para avaliar um fornecedor");
+      navigate('/auth');
       return;
     }
     setCurrentSupplier(supplierName);
@@ -177,11 +178,13 @@ export default function SuppliersPage() {
               Compartilhe sua experiência com a comunidade.
             </DialogDescription>
           </DialogHeader>
-          <AddEvaluationForm 
-            type="supplier" 
-            onSubmit={() => setShowEvaluationDialog(false)}
-            onCancel={() => setShowEvaluationDialog(false)}
-          />
+          <div className="max-h-[80vh] overflow-y-auto">
+            <AddEvaluationForm 
+              type="supplier" 
+              onSubmit={() => setShowEvaluationDialog(false)}
+              onCancel={() => setShowEvaluationDialog(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </MainLayout>

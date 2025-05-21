@@ -3,13 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import { X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,12 +23,10 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
   const [eventName, setEventName] = useState(initialEventName);
   const [eventDate, setEventDate] = useState("");
   const [comment, setComment] = useState("");
-  const [technicalRating, setTechnicalRating] = useState(0);
-  const [ethicalRating, setEthicalRating] = useState(0);
-  const [diplomaticRating, setDiplomaticRating] = useState(0);
+  const [environmentRating, setEnvironmentRating] = useState(0);
   const [organizationRating, setOrganizationRating] = useState(0);
-  const [locationRating, setLocationRating] = useState(0);
-  const [valueRating, setValueRating] = useState(0);
+  const [safetyRating, setSafetyRating] = useState(0);
+  const [qualityRating, setQualityRating] = useState(0);
   const [images, setImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +61,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
           const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
           const filePath = `${user.id}/${fileName}`;
           
-          const { error: uploadError } = await supabase.storage
+          const { error: uploadError, data } = await supabase.storage
             .from('images')
             .upload(filePath, image);
             
@@ -79,8 +70,10 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             continue;
           }
           
-          const { data } = supabase.storage.from('images').getPublicUrl(filePath);
-          uploadedImageUrls.push(data.publicUrl);
+          if (data) {
+            const { data: urlData } = supabase.storage.from('images').getPublicUrl(filePath);
+            uploadedImageUrls.push(urlData.publicUrl);
+          }
         }
       }
       
@@ -91,38 +84,39 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
         comment,
         overall_rating: rating,
         images: uploadedImageUrls,
-        created_at: new Date().toISOString()
       };
       
       if (type === 'event') {
         Object.assign(reviewData, {
-          event_name: eventName, // Custom field for non-registered events
-          event_date: eventDate, // Date of participation
-          technical_rating: technicalRating,
-          ethical_rating: ethicalRating,
-          diplomatic_rating: diplomaticRating
+          event_name: eventName,
+          event_date: eventDate,
+          environment_rating: environmentRating,
+          organization_rating: organizationRating,
+          safety_rating: safetyRating
         });
       } else {
         Object.assign(reviewData, {
           organization_rating: organizationRating,
-          location_rating: locationRating,
-          value_rating: valueRating
+          quality_rating: qualityRating
         });
       }
       
-      // In a real app, we would submit to Supabase
-      // const { error } = await supabase.from('reviews').insert(reviewData);
-      
-      // For now, we'll just simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Submit to Supabase
+      const { error } = await supabase
+        .from('reviews')
+        .insert(reviewData);
+        
+      if (error) {
+        throw error;
+      }
       
       if (onSubmit) {
         onSubmit(reviewData);
       }
       
       toast.success(`Avaliação enviada com sucesso!`);
-    } catch (error) {
-      toast.error("Erro ao enviar avaliação. Tente novamente.");
+    } catch (error: any) {
+      toast.error(`Erro ao enviar avaliação: ${error.message}`);
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -174,7 +168,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
   };
 
   return (
-    <ScrollArea className="h-[80vh] md:h-[60vh] pr-4">
+    <ScrollArea className="h-[80vh] md:h-[60vh] pr-4 overflow-y-auto">
       <div className="bg-card/80 backdrop-blur-sm border border-border/30 rounded-lg p-6">
         <h2 className="text-xl font-bold mb-1">Nova Avaliação</h2>
         <p className="text-sm text-muted-foreground mb-6">
@@ -225,18 +219,18 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             {type === "event" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Técnica</label>
-                  <StarRating value={technicalRating} onChange={setTechnicalRating} />
+                  <label className="block text-sm font-medium mb-1">Ambiente</label>
+                  <StarRating value={environmentRating} onChange={setEnvironmentRating} />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Ética</label>
-                  <StarRating value={ethicalRating} onChange={setEthicalRating} />
+                  <label className="block text-sm font-medium mb-1">Organização</label>
+                  <StarRating value={organizationRating} onChange={setOrganizationRating} />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Diplomacia</label>
-                  <StarRating value={diplomaticRating} onChange={setDiplomaticRating} />
+                  <label className="block text-sm font-medium mb-1">Segurança</label>
+                  <StarRating value={safetyRating} onChange={setSafetyRating} />
                 </div>
               </div>
             )}
@@ -249,13 +243,8 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Localização</label>
-                  <StarRating value={locationRating} onChange={setLocationRating} />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Valor</label>
-                  <StarRating value={valueRating} onChange={setValueRating} />
+                  <label className="block text-sm font-medium mb-1">Qualidade</label>
+                  <StarRating value={qualityRating} onChange={setQualityRating} />
                 </div>
               </div>
             )}

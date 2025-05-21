@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,23 +20,53 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+    name?: string;
+    city?: string;
+  }>({});
 
   // If user is already logged in, redirect to home
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const validateForm = (isSignUp: boolean) => {
+    const errors: {
+      email?: string;
+      password?: string;
+      name?: string;
+      city?: string;
+    } = {};
+
+    if (!email) errors.email = "Email é obrigatório";
+    else if (!/\S+@\S+\.\S+/.test(email)) errors.email = "Email inválido";
+
+    if (!password) errors.password = "Senha é obrigatória";
+    else if (password.length < 6) errors.password = "A senha deve ter pelo menos 6 caracteres";
+
+    if (isSignUp) {
+      if (!name) errors.name = "Nome é obrigatório";
+      if (!city) errors.city = "Cidade é obrigatória";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm(false)) return;
+    
     setIsLoading(true);
     
     try {
       const { error } = await signIn(email, password);
       if (error) throw error;
-      
-      toast.success("Login realizado com sucesso!");
-      navigate('/');
     } catch (error: any) {
       toast.error(error.message || "Falha ao realizar login. Verifique suas credenciais.");
     } finally {
@@ -46,13 +76,14 @@ export default function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm(true)) return;
+    
     setIsLoading(true);
     
     try {
       const { error } = await signUp(email, password, { fullName: name, city });
       if (error) throw error;
-      
-      toast.success("Cadastro realizado com sucesso! Verifique seu email para confirmação.");
     } catch (error: any) {
       toast.error(error.message || "Falha ao realizar cadastro.");
     } finally {
@@ -88,8 +119,11 @@ export default function AuthPage() {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      required
+                      className={formErrors.email ? "border-red-500" : ""}
                     />
+                    {formErrors.email && (
+                      <p className="text-red-500 text-sm">{formErrors.email}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -105,8 +139,11 @@ export default function AuthPage() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      required
+                      className={formErrors.password ? "border-red-500" : ""}
                     />
+                    {formErrors.password && (
+                      <p className="text-red-500 text-sm">{formErrors.password}</p>
+                    )}
                   </div>
                   
                   <Button
@@ -129,8 +166,11 @@ export default function AuthPage() {
                       placeholder="Seu nome completo"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      required
+                      className={formErrors.name ? "border-red-500" : ""}
                     />
+                    {formErrors.name && (
+                      <p className="text-red-500 text-sm">{formErrors.name}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -141,8 +181,11 @@ export default function AuthPage() {
                       placeholder="Sua cidade"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      required
+                      className={formErrors.city ? "border-red-500" : ""}
                     />
+                    {formErrors.city && (
+                      <p className="text-red-500 text-sm">{formErrors.city}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -153,8 +196,11 @@ export default function AuthPage() {
                       placeholder="seu@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      required
+                      className={formErrors.email ? "border-red-500" : ""}
                     />
+                    {formErrors.email && (
+                      <p className="text-red-500 text-sm">{formErrors.email}</p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -165,8 +211,11 @@ export default function AuthPage() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      required
+                      className={formErrors.password ? "border-red-500" : ""}
                     />
+                    {formErrors.password && (
+                      <p className="text-red-500 text-sm">{formErrors.password}</p>
+                    )}
                   </div>
                   
                   <Button
