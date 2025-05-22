@@ -9,6 +9,7 @@ import AddEvaluationForm from "@/components/AddEvaluationForm";
 import EventsTab from "@/components/evaluations/EventsTab";
 import SuppliersTab from "@/components/evaluations/SuppliersTab";
 import { useEvaluationState } from "@/hooks/useEvaluationState";
+import { toast } from "@/components/ui/sonner";
 
 export default function EvaluationsPage() {
   const {
@@ -19,6 +20,15 @@ export default function EvaluationsPage() {
     evaluationType,
     openAddEvaluationDialog
   } = useEvaluationState();
+
+  const handleFormSubmit = () => {
+    setShowAddEvaluationDialog(false);
+    toast.success("Avaliação enviada com sucesso!");
+    // Force reload after a short delay to show the new review
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  };
 
   return (
     <MainLayout>
@@ -82,7 +92,7 @@ export default function EvaluationsPage() {
           </DialogHeader>
           <AddEvaluationForm 
             type={evaluationType} 
-            onSubmit={() => setShowAddEvaluationDialog(false)}
+            onSubmit={handleFormSubmit}
             onCancel={() => setShowAddEvaluationDialog(false)}
           />
         </DialogContent>

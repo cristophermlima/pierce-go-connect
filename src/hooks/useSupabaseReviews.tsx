@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Review } from '@/components/reviews/ReviewCard';
+import { toast } from '@/components/ui/sonner';
 
 interface UseSupabaseReviewsParams {
   type: 'event' | 'supplier';
@@ -32,8 +33,7 @@ export function useSupabaseReviews({ type, entityId }: UseSupabaseReviewsParams)
           created_at,
           user_id,
           profiles(full_name, avatar_url)
-        `)
-        .order('created_at', { ascending: false });
+        `);
 
         // Add filter based on type
         if (entityId) {
@@ -48,7 +48,7 @@ export function useSupabaseReviews({ type, entityId }: UseSupabaseReviewsParams)
           query = query.not('supplier_id', 'is', null);
         }
 
-        const { data, error } = await query;
+        const { data, error } = await query.order('created_at', { ascending: false });
         
         if (error) throw error;
 
@@ -75,6 +75,7 @@ export function useSupabaseReviews({ type, entityId }: UseSupabaseReviewsParams)
       } catch (err: any) {
         console.error('Error fetching reviews:', err);
         setError(err);
+        toast.error("Erro ao carregar avaliações");
       } finally {
         setLoading(false);
       }

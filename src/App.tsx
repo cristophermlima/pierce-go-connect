@@ -16,6 +16,7 @@ import AuthPage from "./pages/AuthPage";
 import EvaluationsPage from "./pages/EvaluationsPage";
 import TravelPage from "./pages/TravelPage";
 import SuppliersPage from "./pages/SuppliersPage";
+import ProfilePage from "./pages/ProfilePage";
 import SubmitPage from "./pages/SubmitPage";
 import NotFound from "./pages/NotFound";
 
@@ -33,33 +34,20 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/eventos" element={<EventsPage />} />
             <Route path="/eventos/:id" element={<EventDetailPage />} />
-            <Route 
-              path="/avaliacoes" 
-              element={
-                <ProtectedRoute>
-                  <EvaluationsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/viagens" 
-              element={
-                <ProtectedRoute>
-                  <TravelPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/fornecedores" 
-              element={
-                <ProtectedRoute>
-                  <SuppliersPage />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/avaliacoes" element={<EvaluationsPage />} />
+            <Route path="/viagens" element={<TravelPage />} />
+            <Route path="/fornecedores" element={<SuppliersPage />} />
             <Route path="/planos" element={<PlansPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/cadastro" element={<RegisterPage />} />
+            <Route 
+              path="/perfil" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/submit" 
               element={

@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Função auxiliar para buscar o perfil do usuário
+  // Helper function to fetch user profile
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Função para atualizar o perfil
+  // Function to update profile
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!user) return { error: new Error('User not authenticated') };
 
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Função para recarregar os dados do perfil do usuário
+  // Function to reload user profile data
   const refreshProfile = async () => {
     if (!user) return;
 
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Use setTimeout to evitar deadlock potencial
+          // Use setTimeout to avoid potential deadlock
           setTimeout(async () => {
             const fetchedProfile = await fetchProfile(session.user.id);
             setProfile(fetchedProfile);
@@ -163,7 +163,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { error } = await supabase.auth.signOut();
     if (error) console.error('Error signing out:', error);
     setProfile(null);
-    navigate('/auth');
+    toast.success("Logout realizado com sucesso!");
+    navigate('/');
   };
 
   const value = {

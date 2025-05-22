@@ -9,6 +9,8 @@ interface Supplier {
   type: string;
   image: string;
   location: string;
+  rating?: number;
+  reviews?: number;
 }
 
 interface SuppliersTabProps {
@@ -17,15 +19,7 @@ interface SuppliersTabProps {
 }
 
 export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProps) {
-  const [suppliers, setSuppliers] = useState<Array<{
-    id?: string;
-    title: string;
-    type: string;
-    image: string;
-    location: string;
-    rating: number;
-    reviews: number;
-  }>>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -89,9 +83,10 @@ export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProp
     fetchSuppliers();
   }, [searchQuery]);
 
-  // If we don't have suppliers from the database yet, use our mock data
+  // Mock suppliers as a fallback
   const mockSuppliers = [
     {
+      id: "mock-1",
       title: "Revolution Piercing",
       type: "Joias e Acessórios",
       image: "/placeholder.svg",
@@ -100,6 +95,7 @@ export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProp
       reviews: 56
     },
     {
+      id: "mock-2",
       title: "Angel Piercing",
       type: "Joias e Acessórios",
       image: "/placeholder.svg",
@@ -118,15 +114,15 @@ export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProp
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : displaySuppliers.length > 0 ? (
-        displaySuppliers.map((supplier, index) => (
+        displaySuppliers.map((supplier) => (
           <SupplierCard 
-            key={supplier.id || index}
+            key={supplier.id}
             title={supplier.title}
             type={supplier.type}
             image={supplier.image}
             location={supplier.location}
-            rating={supplier.rating}
-            reviews={supplier.reviews}
+            rating={supplier.rating || 0}
+            reviews={supplier.reviews || 0}
             onAddReview={() => onAddReview("supplier")}
           />
         ))

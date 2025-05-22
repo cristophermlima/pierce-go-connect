@@ -3,16 +3,19 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PostgrestError } from '@supabase/supabase-js';
 
-// Tipo genérico para a resposta da consulta
+// Generic type for query response
 type QueryResponse<T> = {
   data: T | null;
   error: PostgrestError | null;
 };
 
-// Hook para buscar dados do Supabase
+// Valid table names for type safety
+type TableName = 'events' | 'suppliers' | 'profiles' | 'reviews' | 'schedules' | 'travel_plans';
+
+// Hook to fetch data from Supabase
 export function useSupabaseQuery<T = any>(
   key: string | (string | number)[],
-  tableName: string,
+  tableName: TableName,
   queryFn: () => Promise<QueryResponse<T>>,
   options?: UseQueryOptions<T | null, PostgrestError, T>
 ) {
@@ -34,10 +37,10 @@ export function useSupabaseQuery<T = any>(
   });
 }
 
-// Função auxiliar para buscar dados por ID
+// Helper function to fetch data by ID
 export function useSupabaseQueryById<T = any>(
-  tableName: string,
-  id: string | number | undefined,
+  tableName: TableName,
+  id: string | undefined,
   options?: UseQueryOptions<T | null, PostgrestError, T>
 ) {
   return useSupabaseQuery<T>(
