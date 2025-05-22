@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +18,7 @@ export default function SuppliersPage() {
   const [currentSupplier, setCurrentSupplier] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleOpenEvaluationDialog = (supplierName: string) => {
     if (!user) {
