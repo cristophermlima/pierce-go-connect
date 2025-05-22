@@ -10,6 +10,7 @@ import EventsTab from "@/components/evaluations/EventsTab";
 import SuppliersTab from "@/components/evaluations/SuppliersTab";
 import { useEvaluationState } from "@/hooks/useEvaluationState";
 import { toast } from "@/components/ui/sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function EvaluationsPage() {
   const {
@@ -20,6 +21,8 @@ export default function EvaluationsPage() {
     evaluationType,
     openAddEvaluationDialog
   } = useEvaluationState();
+  
+  const isMobile = useIsMobile();
 
   const handleFormSubmit = () => {
     setShowAddEvaluationDialog(false);
@@ -33,30 +36,28 @@ export default function EvaluationsPage() {
   return (
     <MainLayout>
       <div className="container py-10">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold mb-3">Score Piercing</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Score Piercing</h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Avaliações técnicas, diplomáticas e éticas de eventos e fornecedores da área de body piercing.
             </p>
           </div>
           
           <div className="mb-6">
             <Tabs defaultValue="eventos" className="w-full">
-              <div className="flex justify-between items-center mb-6">
-                <TabsList className="bg-muted">
-                  <TabsTrigger value="eventos" className="px-8 py-2">Eventos</TabsTrigger>
-                  <TabsTrigger value="fornecedores" className="px-8 py-2">Fornecedores</TabsTrigger>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                <TabsList className="w-full sm:w-auto bg-muted">
+                  <TabsTrigger value="eventos" className="flex-1 sm:flex-none px-4 sm:px-8 py-2">Eventos</TabsTrigger>
+                  <TabsTrigger value="fornecedores" className="flex-1 sm:flex-none px-4 sm:px-8 py-2">Fornecedores</TabsTrigger>
                 </TabsList>
                 
-                <div className="flex gap-3">
-                  <Button 
-                    className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
-                    onClick={() => openAddEvaluationDialog("event")}
-                  >
-                    Adicionar Avaliação
-                  </Button>
-                </div>
+                <Button 
+                  className="bg-gradient-to-r from-piercing-purple to-piercing-pink w-full sm:w-auto"
+                  onClick={() => openAddEvaluationDialog("event")}
+                >
+                  Adicionar Avaliação
+                </Button>
               </div>
               
               <div className="relative mb-8">
@@ -83,18 +84,20 @@ export default function EvaluationsPage() {
 
       {/* Add Evaluation Dialog */}
       <Dialog open={showAddEvaluationDialog} onOpenChange={setShowAddEvaluationDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className={`sm:max-w-2xl ${isMobile ? 'p-4 h-[90vh] overflow-scroll' : ''}`}>
           <DialogHeader>
             <DialogTitle>Adicionar Avaliação</DialogTitle>
             <DialogDescription>
               Compartilhe sua experiência com a comunidade.
             </DialogDescription>
           </DialogHeader>
-          <AddEvaluationForm 
-            type={evaluationType} 
-            onSubmit={handleFormSubmit}
-            onCancel={() => setShowAddEvaluationDialog(false)}
-          />
+          <div className={isMobile ? 'max-h-[70vh] overflow-y-auto -mx-4 px-4' : ''}>
+            <AddEvaluationForm 
+              type={evaluationType} 
+              onSubmit={handleFormSubmit}
+              onCancel={() => setShowAddEvaluationDialog(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </MainLayout>

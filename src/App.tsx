@@ -18,6 +18,7 @@ import TravelPage from "./pages/TravelPage";
 import SuppliersPage from "./pages/SuppliersPage";
 import ProfilePage from "./pages/ProfilePage";
 import SubmitPage from "./pages/SubmitPage";
+import DashboardPage from "./pages/DashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
                 </ProtectedRoute>
               } 
             />
