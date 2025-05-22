@@ -2,15 +2,21 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ReviewCard, type Review } from "@/components/reviews/ReviewCard";
+import { useSupabaseReviews } from "@/hooks/useSupabaseReviews";
 
 interface ReviewsListProps {
   type: "event" | "supplier";
-  reviews: Review[];
+  entityId?: string;  
   onAddReview?: () => void;
+  reviews?: Review[];  // Optional prop for passing reviews directly
 }
 
-export default function ReviewsList({ type, reviews, onAddReview }: ReviewsListProps) {
+export default function ReviewsList({ type, entityId, onAddReview, reviews: passedReviews }: ReviewsListProps) {
   const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
+  const { reviews: fetchedReviews, loading } = useSupabaseReviews({ type, entityId });
+  
+  // Use passed reviews if provided, otherwise use fetched reviews
+  const reviews = passedReviews || fetchedReviews;
   
   const sortedReviews = [...reviews].sort((a, b) => {
     if (sortBy === "recent") {
@@ -21,6 +27,15 @@ export default function ReviewsList({ type, reviews, onAddReview }: ReviewsListP
       return a.rating - b.rating;
     }
   });
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Carregando avaliações...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

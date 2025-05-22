@@ -60,11 +60,11 @@ export default function EvaluationsPage() {
               </div>
 
               <TabsContent value="eventos">
-                <EventsTab onAddReview={(type) => openAddEvaluationDialog(type)} />
+                <EventsTab onAddReview={(type) => openAddEvaluationDialog(type)} searchQuery={searchQuery} />
               </TabsContent>
               
               <TabsContent value="fornecedores">
-                <SuppliersTab onAddReview={(type) => openAddEvaluationDialog(type)} />
+                <SuppliersTab onAddReview={(type) => openAddEvaluationDialog(type)} searchQuery={searchQuery} />
               </TabsContent>
             </Tabs>
           </div>

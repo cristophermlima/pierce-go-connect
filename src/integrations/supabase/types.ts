@@ -9,7 +9,251 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          id: string
+          image: string | null
+          location: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          image?: string | null
+          location: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          image?: string | null
+          location?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          is_event_organizer: boolean | null
+          is_supplier: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          is_event_organizer?: boolean | null
+          is_supplier?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_event_organizer?: boolean | null
+          is_supplier?: boolean | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string | null
+          environment_rating: number | null
+          event_date: string | null
+          event_id: string | null
+          event_name: string | null
+          id: string
+          images: string[] | null
+          organization_rating: number | null
+          overall_rating: number
+          quality_rating: number | null
+          safety_rating: number | null
+          supplier_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          environment_rating?: number | null
+          event_date?: string | null
+          event_id?: string | null
+          event_name?: string | null
+          id?: string
+          images?: string[] | null
+          organization_rating?: number | null
+          overall_rating: number
+          quality_rating?: number | null
+          safety_rating?: number | null
+          supplier_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          environment_rating?: number | null
+          event_date?: string | null
+          event_id?: string | null
+          event_name?: string | null
+          id?: string
+          images?: string[] | null
+          organization_rating?: number | null
+          overall_rating?: number
+          quality_rating?: number | null
+          safety_rating?: number | null
+          supplier_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_date: string
+          id: string
+          location: string | null
+          start_date: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          location?: string | null
+          start_date: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          location?: string | null
+          start_date?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          id: string
+          image: string | null
+          location: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          image?: string | null
+          location: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          image?: string | null
+          location?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      travel_plans: {
+        Row: {
+          accommodation_name: string | null
+          accommodation_type: string | null
+          check_in: string | null
+          check_out: string | null
+          created_at: string | null
+          departure_date: string | null
+          event_id: string | null
+          id: string
+          notes: string | null
+          return_date: string | null
+          transport_type: string | null
+          user_id: string
+        }
+        Insert: {
+          accommodation_name?: string | null
+          accommodation_type?: string | null
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          departure_date?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          transport_type?: string | null
+          user_id: string
+        }
+        Update: {
+          accommodation_name?: string | null
+          accommodation_type?: string | null
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          departure_date?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          return_date?: string | null
+          transport_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_plans_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -78,7 +78,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       }
       
       // Prepare review data
-      const reviewData = {
+      const reviewData: any = {
         user_id: user.id,
         title,
         comment,

@@ -3,10 +3,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StarRating, CategoryStarRating } from "./StarRating";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Review {
   id: string;
   author: string;
+  authorAvatar?: string;
   date: string;
   rating: number;
   comment: string;
@@ -32,12 +34,30 @@ export function ReviewCard({ review, type }: ReviewCardProps) {
     setIsHelpful(!isHelpful);
   };
   
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  
   return (
     <div className="border border-border/30 rounded-lg p-4 bg-card/80 backdrop-blur-sm">
       <div className="flex justify-between items-start">
-        <div>
-          <div className="font-semibold">{review.author || "Usuário anônimo"}</div>
-          <div className="text-sm text-muted-foreground">{review.date}</div>
+        <div className="flex items-center gap-3">
+          <Avatar>
+            {review.authorAvatar ? (
+              <AvatarImage src={review.authorAvatar} alt={review.author} />
+            ) : (
+              <AvatarFallback>{getInitials(review.author)}</AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <div className="font-semibold">{review.author}</div>
+            <div className="text-sm text-muted-foreground">{review.date}</div>
+          </div>
         </div>
         <StarRating rating={review.rating} />
       </div>
