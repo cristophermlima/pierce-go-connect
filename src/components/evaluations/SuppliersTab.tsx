@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import SupplierCard from "./SupplierCard";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 interface Supplier {
   id: string;
@@ -16,9 +16,10 @@ interface Supplier {
 interface SuppliersTabProps {
   onAddReview: (type: "supplier") => void;
   searchQuery?: string;
+  refreshKey?: number; // Add refreshKey prop
 }
 
-export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProps) {
+export function SuppliersTab({ onAddReview, searchQuery = "", refreshKey = 0 }: SuppliersTabProps) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,7 +82,7 @@ export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProp
     }
 
     fetchSuppliers();
-  }, [searchQuery]);
+  }, [searchQuery, refreshKey]); // Add refreshKey as dependency
 
   // Mock suppliers as a fallback
   const mockSuppliers = [
@@ -124,6 +125,7 @@ export function SuppliersTab({ onAddReview, searchQuery = "" }: SuppliersTabProp
             rating={supplier.rating || 0}
             reviews={supplier.reviews || 0}
             onAddReview={() => onAddReview("supplier")}
+            refreshKey={refreshKey}
           />
         ))
       ) : (

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import EventCard from "./EventCard";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 interface Event {
   id: string;
@@ -14,9 +14,10 @@ interface Event {
 interface EventsTabProps {
   onAddReview: (type: "event") => void;
   searchQuery?: string;
+  refreshKey?: number; // Add refreshKey prop
 }
 
-export function EventsTab({ onAddReview, searchQuery = "" }: EventsTabProps) {
+export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: EventsTabProps) {
   const [events, setEvents] = useState<Array<{
     id?: string;
     title: string;
@@ -108,7 +109,7 @@ export function EventsTab({ onAddReview, searchQuery = "" }: EventsTabProps) {
     }
 
     fetchEvents();
-  }, [searchQuery]);
+  }, [searchQuery, refreshKey]); // Add refreshKey as dependency
 
   // If we don't have events from the database yet, use our mock data
   const mockEvents = [
@@ -158,6 +159,7 @@ export function EventsTab({ onAddReview, searchQuery = "" }: EventsTabProps) {
             ethicalRating={event.ethicalRating}
             diplomaticRating={event.diplomaticRating}
             onAddReview={() => onAddReview("event")}
+            refreshKey={refreshKey}
           />
         ))
       ) : (

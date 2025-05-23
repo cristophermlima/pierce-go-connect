@@ -22,15 +22,15 @@ export default function EvaluationsPage() {
     openAddEvaluationDialog
   } = useEvaluationState();
   
+  const [refreshKey, setRefreshKey] = useState(0); // Add a refreshKey state
   const isMobile = useIsMobile();
 
   const handleFormSubmit = () => {
     setShowAddEvaluationDialog(false);
     toast.success("Avaliação enviada com sucesso!");
-    // Force reload after a short delay to show the new review
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
+    
+    // Increment the refresh key to trigger a refresh
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   return (
@@ -71,11 +71,19 @@ export default function EvaluationsPage() {
               </div>
 
               <TabsContent value="eventos">
-                <EventsTab onAddReview={(type) => openAddEvaluationDialog(type)} searchQuery={searchQuery} />
+                <EventsTab 
+                  onAddReview={(type) => openAddEvaluationDialog(type)} 
+                  searchQuery={searchQuery} 
+                  refreshKey={refreshKey}
+                />
               </TabsContent>
               
               <TabsContent value="fornecedores">
-                <SuppliersTab onAddReview={(type) => openAddEvaluationDialog(type)} searchQuery={searchQuery} />
+                <SuppliersTab 
+                  onAddReview={(type) => openAddEvaluationDialog(type)} 
+                  searchQuery={searchQuery} 
+                  refreshKey={refreshKey}
+                />
               </TabsContent>
             </Tabs>
           </div>

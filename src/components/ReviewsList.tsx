@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ReviewCard, type Review } from "@/components/reviews/ReviewCard";
 import { useSupabaseReviews } from "@/hooks/useSupabaseReviews";
@@ -9,11 +9,18 @@ interface ReviewsListProps {
   entityId?: string;  
   onAddReview?: () => void;
   reviews?: Review[];  // Optional prop for passing reviews directly
+  refreshKey?: number; // Add refreshKey prop to trigger refresh
 }
 
-export default function ReviewsList({ type, entityId, onAddReview, reviews: passedReviews }: ReviewsListProps) {
+export default function ReviewsList({ type, entityId, onAddReview, reviews: passedReviews, refreshKey = 0 }: ReviewsListProps) {
   const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
-  const { reviews: fetchedReviews, loading } = useSupabaseReviews({ type, entityId });
+  
+  // Use refreshKey to trigger data refresh when it changes
+  const { reviews: fetchedReviews, loading, refreshReviews } = useSupabaseReviews({ 
+    type, 
+    entityId,
+    refreshKey 
+  });
   
   // Use passed reviews if provided, otherwise use fetched reviews
   const reviews = passedReviews || fetchedReviews;
