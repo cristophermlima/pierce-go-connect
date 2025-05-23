@@ -12,7 +12,7 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
-      <main className={`flex-1 pt-16 ${className || ''}`}>
+      <main className={`flex-1 ${className || 'pt-16'}`}>
         {children}
       </main>
       <Footer />
