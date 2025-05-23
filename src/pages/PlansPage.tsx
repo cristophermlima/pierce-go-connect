@@ -3,11 +3,12 @@ import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PlanFeature {
   name: string;
@@ -29,9 +30,10 @@ export default function PlansPage() {
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual">("monthly");
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   
-  const handlePlanSelection = (planId: string) => {
+  const handlePlanSelection = async (planId: string) => {
     if (!user) {
       toast.error("Você precisa estar logado para assinar um plano", {
         description: "Faça login para continuar com a assinatura"
@@ -41,8 +43,41 @@ export default function PlansPage() {
     }
     
     setSelectedPlan(planId);
-    // Em uma implementação real, aqui você redirecionaria para a página de checkout
-    toast.success(`Plano ${planId} selecionado! Em breve você será redirecionado para o checkout.`);
+    setIsLoading(planId);
+    
+    try {
+      // For free plan, just show success message
+      if (planId === "free") {
+        toast.success("Plano gratuito selecionado!");
+        setIsLoading(null);
+        return;
+      }
+      
+      // For paid plans, create a Stripe checkout session
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { plan: planId, billingInterval }
+      });
+      
+      if (error) {
+        console.error("Error creating checkout session:", error);
+        toast.error("Erro ao processar pagamento", {
+          description: "Ocorreu um erro ao criar a sessão de pagamento."
+        });
+        return;
+      }
+      
+      if (data?.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        toast.error("Erro ao gerar link de pagamento");
+      }
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      toast.error("Erro ao processar pagamento");
+    } finally {
+      setIsLoading(null);
+    }
   };
   
   const pricingPlans: PricingPlan[] = [
@@ -194,8 +229,16 @@ export default function PlansPage() {
                   <Button 
                     className={`w-full ${plan.color}`}
                     onClick={() => handlePlanSelection(plan.id)}
+                    disabled={isLoading !== null}
                   >
-                    {plan.buttonText}
+                    {isLoading === plan.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      plan.buttonText
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
