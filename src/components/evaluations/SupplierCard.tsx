@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ReviewsList from "@/components/ReviewsList";
 
 interface SupplierCardProps {
   title: string;
@@ -11,6 +12,8 @@ interface SupplierCardProps {
   rating: number;
   reviews: number;
   onAddReview?: () => void;
+  refreshKey?: number; // Add refreshKey prop
+  id?: string; // Add optional id prop
 }
 
 export function SupplierCard({ 
@@ -20,7 +23,9 @@ export function SupplierCard({
   location, 
   rating, 
   reviews, 
-  onAddReview 
+  onAddReview,
+  refreshKey = 0, // Default to 0
+  id
 }: SupplierCardProps) {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   
@@ -71,15 +76,25 @@ export function SupplierCard({
               <div className="text-muted-foreground">({reviews} avaliações)</div>
             </div>
             
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">Ainda não há avaliações para este fornecedor.</p>
-              <Button 
-                onClick={onAddReview}
-                className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
-              >
-                Seja o primeiro a avaliar
-              </Button>
-            </div>
+            {/* Show actual reviews using ReviewsList */}
+            {id ? (
+              <ReviewsList 
+                type="supplier" 
+                entityId={id} 
+                onAddReview={onAddReview}
+                refreshKey={refreshKey} 
+              />
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground mb-4">Ainda não há avaliações para este fornecedor.</p>
+                <Button 
+                  onClick={onAddReview}
+                  className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
+                >
+                  Seja o primeiro a avaliar
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

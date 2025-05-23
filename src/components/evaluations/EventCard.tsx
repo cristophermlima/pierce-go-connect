@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ReviewsList from "@/components/ReviewsList";
 
 interface EventCardProps {
   title: string;
@@ -14,6 +15,8 @@ interface EventCardProps {
   ethicalRating: number;
   diplomaticRating: number;
   onAddReview?: () => void;
+  refreshKey?: number; // Add refreshKey prop
+  id?: string; // Add optional id prop
 }
 
 export function EventCard({ 
@@ -26,7 +29,9 @@ export function EventCard({
   technicalRating, 
   ethicalRating, 
   diplomaticRating,
-  onAddReview
+  onAddReview,
+  refreshKey = 0, // Default to 0
+  id
 }: EventCardProps) {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   
@@ -140,15 +145,25 @@ export function EventCard({
               </div>
             </div>
             
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">Ainda não há avaliações para este evento.</p>
-              <Button 
-                onClick={onAddReview}
-                className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
-              >
-                Seja o primeiro a avaliar
-              </Button>
-            </div>
+            {/* Show actual reviews using ReviewsList */}
+            {id ? (
+              <ReviewsList 
+                type="event" 
+                entityId={id} 
+                onAddReview={onAddReview}
+                refreshKey={refreshKey} 
+              />
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground mb-4">Ainda não há avaliações para este evento.</p>
+                <Button 
+                  onClick={onAddReview}
+                  className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
+                >
+                  Seja o primeiro a avaliar
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -20,6 +20,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
     setError(null);
     
     try {
+      console.log(`Fetching reviews for ${type} with ID ${entityId || 'all'}, refreshKey: ${refreshKey}`);
+      
       let query = supabase.from('reviews').select(`
         id,
         title,
@@ -53,6 +55,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
       if (error) throw error;
 
       if (data) {
+        console.log(`Found ${data.length} reviews for ${type}`);
+        
         const formattedReviews: Review[] = data.map((item: any) => ({
           id: item.id,
           author: item.profiles?.full_name || 'Usuário anônimo',
@@ -79,7 +83,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
     } finally {
       setLoading(false);
     }
-  }, [type, entityId]);
+  }, [type, entityId, refreshKey]); // Add refreshKey as dependency
 
   // Function to manually refresh reviews
   const refreshReviews = useCallback(() => {
@@ -88,7 +92,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
 
   useEffect(() => {
     fetchReviews();
-  }, [fetchReviews, refreshKey]); // Add refreshKey as a dependency
+  }, [fetchReviews]); // This will run when refreshKey changes because fetchReviews depends on it
 
   return { reviews, loading, error, refreshReviews };
 }

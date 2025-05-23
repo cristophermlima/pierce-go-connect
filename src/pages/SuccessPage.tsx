@@ -13,8 +13,12 @@ export default function SuccessPage() {
   useEffect(() => {
     // Check subscription status after successful payment
     const updateSubscriptionStatus = async () => {
-      await checkSubscription();
-      toast.success("Assinatura ativada com sucesso!");
+      try {
+        await checkSubscription();
+        toast.success("Assinatura ativada com sucesso!");
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+      }
     };
     
     updateSubscriptionStatus();
@@ -35,12 +39,19 @@ export default function SuccessPage() {
           <h1 className="text-3xl font-bold mb-3">Pagamento Confirmado!</h1>
           <p className="text-lg text-muted-foreground mb-8">
             Obrigado pela sua assinatura. Sua conta foi atualizada com sucesso.
+            Agora você tem acesso a recursos premium como adicionar eventos à sua agenda.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button 
-              onClick={() => navigate("/perfil")}
+              onClick={() => navigate("/agenda")}
               className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
+            >
+              Ir para Agenda
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => navigate("/perfil")}
             >
               Ver Perfil
             </Button>

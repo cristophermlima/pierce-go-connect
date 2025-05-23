@@ -2,41 +2,13 @@
 project_id = "bkmvmhdrigtmcwokakhp"
 
 [api]
+enabled = true
 port = 54321
-schemas = [ "public", "storage", "graphql_public" ]
-extra_search_path = [ "public", "extensions" ]
-max_rows = 1000
+schemas = ["public", "storage"]
 
 [db]
-port = 5432
-shadow_port = 54320
-major_version = 15
-
-[db.pooler]
-enabled = false
-port = 5432
-pool_mode = "transaction"
-default_pool_size = 15
-max_client_conn = 100
-
-[realtime]
-enabled = false
+port = 54322
 
 [studio]
 enabled = true
 port = 54323
-api_url = "https://api.supabase.io"
-
-# Add our custom edge functions
-[functions]
-[functions.check-subscription]
-verify_jwt = true
-
-[functions.create-checkout]
-verify_jwt = true
-
-[functions.customer-portal]
-verify_jwt = true
-
-[auth]
-enable_signup = true

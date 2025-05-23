@@ -118,6 +118,7 @@ export function SuppliersTab({ onAddReview, searchQuery = "", refreshKey = 0 }: 
         displaySuppliers.map((supplier) => (
           <SupplierCard 
             key={supplier.id}
+            id={supplier.id}
             title={supplier.title}
             type={supplier.type}
             image={supplier.image}

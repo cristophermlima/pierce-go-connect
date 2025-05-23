@@ -114,6 +114,7 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
   // If we don't have events from the database yet, use our mock data
   const mockEvents = [
     {
+      id: "mock-1",
       title: "GEP - Grupo de Estudos em Piercing",
       type: "Conferência",
       image: "/placeholder.svg",
@@ -125,6 +126,7 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
       diplomaticRating: 5
     },
     {
+      id: "mock-2",
       title: "Expo Piercing Brasil",
       type: "Exposição",
       image: "/placeholder.svg",
@@ -149,15 +151,16 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
         displayEvents.map((event, index) => (
           <EventCard 
             key={event.id || index}
+            id={event.id}
             title={event.title}
             type={event.type}
             image={event.image}
             location={event.location}
             rating={event.rating}
             reviews={event.reviews}
-            technicalRating={event.technicalRating}
-            ethicalRating={event.ethicalRating}
-            diplomaticRating={event.diplomaticRating}
+            technicalRating={event.technicalRating || 0}
+            ethicalRating={event.ethicalRating || 0}
+            diplomaticRating={event.diplomaticRating || 0}
             onAddReview={() => onAddReview("event")}
             refreshKey={refreshKey}
           />
