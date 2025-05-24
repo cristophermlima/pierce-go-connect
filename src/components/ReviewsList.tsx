@@ -16,11 +16,13 @@ export default function ReviewsList({ type, entityId, onAddReview, reviews: pass
   const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
   
   // Use refreshKey to trigger data refresh when it changes
-  const { reviews: fetchedReviews, loading, refreshReviews } = useSupabaseReviews({ 
+  const { reviews: fetchedReviews, loading } = useSupabaseReviews({ 
     type, 
     entityId,
     refreshKey 
   });
+  
+  console.log(`ReviewsList - ${type} with ID ${entityId || 'all'}, refreshKey: ${refreshKey}, reviews count:`, fetchedReviews?.length);
   
   // Use passed reviews if provided, otherwise use fetched reviews
   const reviews = passedReviews || fetchedReviews;

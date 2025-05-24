@@ -102,16 +102,18 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       }
       
       // Submit to Supabase
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('reviews')
-        .insert(reviewData);
+        .insert(reviewData)
+        .select();
         
       if (error) {
         throw error;
       }
       
       if (onSubmit) {
-        onSubmit(reviewData);
+        // Passa os dados da avaliação para o callback onSubmit
+        onSubmit(data ? data[0] : reviewData);
       }
       
       toast.success(`Avaliação enviada com sucesso!`);

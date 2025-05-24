@@ -34,6 +34,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         images,
         created_at,
         user_id,
+        event_id,
+        supplier_id,
         profiles(full_name, avatar_url)
       `);
 
@@ -91,6 +93,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
   }, [fetchReviews]);
 
   useEffect(() => {
+    console.log("useSupabaseReviews - refreshKey changed:", refreshKey);
     fetchReviews();
   }, [fetchReviews]); // This will run when refreshKey changes because fetchReviews depends on it
 

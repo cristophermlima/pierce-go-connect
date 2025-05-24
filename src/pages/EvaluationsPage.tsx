@@ -25,12 +25,16 @@ export default function EvaluationsPage() {
   const [refreshKey, setRefreshKey] = useState(0); // Add a refreshKey state
   const isMobile = useIsMobile();
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = (reviewData: any) => {
+    // Log para debug
+    console.log("Nova avaliação submetida:", reviewData);
+    
     setShowAddEvaluationDialog(false);
     toast.success("Avaliação enviada com sucesso!");
     
     // Increment the refresh key to trigger a refresh
     setRefreshKey(prevKey => prevKey + 1);
+    console.log("RefreshKey incrementado:", refreshKey + 1);
   };
 
   return (
@@ -74,7 +78,7 @@ export default function EvaluationsPage() {
                 <EventsTab 
                   onAddReview={(type) => openAddEvaluationDialog(type)} 
                   searchQuery={searchQuery} 
-                  refreshKey={refreshKey}
+                  refreshKey={refreshKey} // Pass refreshKey to EventsTab
                 />
               </TabsContent>
               
@@ -82,7 +86,7 @@ export default function EvaluationsPage() {
                 <SuppliersTab 
                   onAddReview={(type) => openAddEvaluationDialog(type)} 
                   searchQuery={searchQuery} 
-                  refreshKey={refreshKey}
+                  refreshKey={refreshKey} // Pass refreshKey to SuppliersTab
                 />
               </TabsContent>
             </Tabs>
