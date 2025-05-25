@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,6 @@ interface AddEvaluationFormProps {
 export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEventName = "" }: AddEvaluationFormProps) {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
-  const [title, setTitle] = useState("");
   const [eventName, setEventName] = useState(initialEventName);
   const [eventDate, setEventDate] = useState("");
   const [comment, setComment] = useState("");
@@ -80,14 +78,27 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       // Prepare review data
       const reviewData: any = {
         user_id: user.id,
-        title,
+        title: type === 'event' ? `Avaliação do evento ${eventName}` : 'Avaliação de fornecedor',
         comment,
         overall_rating: rating,
         images: uploadedImageUrls,
       };
       
       if (type === 'event') {
+        // Try to find existing event or create reference
+        let eventId = null;
+        const { data: existingEvent } = await supabase
+          .from('events')
+          .select('id')
+          .ilike('title', `%${eventName}%`)
+          .single();
+        
+        if (existingEvent) {
+          eventId = existingEvent.id;
+        }
+
         Object.assign(reviewData, {
+          event_id: eventId,
           event_name: eventName,
           event_date: eventDate,
           environment_rating: environmentRating,
@@ -112,7 +123,6 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       }
       
       if (onSubmit) {
-        // Passa os dados da avaliação para o callback onSubmit
         onSubmit(data ? data[0] : reviewData);
       }
       
@@ -127,10 +137,9 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const fileArray = Array.from(e.target.files).slice(0, 5); // Limit to 5 files
+      const fileArray = Array.from(e.target.files).slice(0, 5);
       setImages([...images, ...fileArray]);
       
-      // Create preview URLs
       const newPreviewUrls = fileArray.map(file => URL.createObjectURL(file));
       setPreviewImages([...previewImages, ...newPreviewUrls]);
     }
@@ -142,7 +151,6 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
     setImages(newImages);
 
     const newPreviews = [...previewImages];
-    // Revoke the object URL to free memory
     URL.revokeObjectURL(newPreviews[index]);
     newPreviews.splice(index, 1);
     setPreviewImages(newPreviews);
@@ -202,16 +210,6 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
                 </div>
               </>
             )}
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Título da Avaliação</label>
-              <Input 
-                placeholder="Resumo da sua experiência" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
             
             <div>
               <label className="block text-sm font-medium mb-2">Avaliação Geral</label>

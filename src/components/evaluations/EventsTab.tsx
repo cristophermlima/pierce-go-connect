@@ -1,173 +1,137 @@
 
 import React, { useEffect, useState } from "react";
-import EventCard from "./EventCard";
 import { supabase } from '@/integrations/supabase/client';
-
-interface Event {
-  id: string;
-  title: string;
-  type: string;
-  image: string;
-  location: string;
-}
+import ReviewsList from "@/components/ReviewsList";
 
 interface EventsTabProps {
   onAddReview: (type: "event") => void;
   searchQuery?: string;
-  refreshKey?: number; // Add refreshKey prop
+  refreshKey?: number;
 }
 
 export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: EventsTabProps) {
-  const [events, setEvents] = useState<Array<{
-    id?: string;
-    title: string;
-    type: string;
-    image: string;
-    location: string;
-    rating: number;
-    reviews: number;
-    technicalRating?: number;
-    ethicalRating?: number;
-    diplomaticRating?: number;
-  }>>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchEvaluatedEvents() {
       try {
         setLoading(true);
         
-        // Fetch events from Supabase
-        let query = supabase.from('events').select('*');
+        // Fetch unique events that have reviews
+        let query = supabase
+          .from('reviews')
+          .select(`
+            event_name,
+            event_id,
+            overall_rating,
+            created_at,
+            profiles(full_name, avatar_url)
+          `)
+          .not('event_name', 'is', null);
         
         if (searchQuery) {
-          query = query.or(`title.ilike.%${searchQuery}%, type.ilike.%${searchQuery}%, location.ilike.%${searchQuery}%`);
+          query = query.ilike('event_name', `%${searchQuery}%`);
         }
         
-        const { data, error } = await query;
+        const { data, error } = await query.order('created_at', { ascending: false });
         
         if (error) {
-          console.error("Error fetching events:", error);
+          console.error("Error fetching reviewed events:", error);
           return;
         }
 
-        // For each event, fetch their reviews to calculate average ratings
-        const eventsWithRatings = await Promise.all(
-          data.map(async (event: Event) => {
-            const { data: reviews, error: reviewsError } = await supabase
-              .from('reviews')
-              .select('overall_rating, environment_rating, safety_rating, organization_rating')
-              .eq('event_id', event.id);
+        // Group reviews by event name to get unique events
+        const eventMap = new Map();
+        data?.forEach((review: any) => {
+          const eventName = review.event_name;
+          if (!eventMap.has(eventName)) {
+            eventMap.set(eventName, {
+              name: eventName,
+              id: review.event_id || `event-${eventName.toLowerCase().replace(/\s+/g, '-')}`,
+              reviewCount: 1,
+              averageRating: review.overall_rating,
+              lastReview: review.created_at
+            });
+          } else {
+            const existing = eventMap.get(eventName);
+            existing.reviewCount += 1;
+            existing.averageRating = (existing.averageRating + review.overall_rating) / 2;
+          }
+        });
 
-            if (reviewsError) {
-              console.error("Error fetching reviews:", reviewsError);
-              return {
-                ...event,
-                rating: 0,
-                reviews: 0,
-                technicalRating: 0,
-                ethicalRating: 0,
-                diplomaticRating: 0,
-                image: event.image || "/placeholder.svg"
-              };
-            }
-
-            const rating = reviews.length > 0 
-              ? reviews.reduce((sum: number, review: any) => sum + review.overall_rating, 0) / reviews.length
-              : 0;
-              
-            const technicalRating = reviews.length > 0 
-              ? reviews.reduce((sum: number, review: any) => sum + (review.environment_rating || 0), 0) / reviews.length
-              : 0;
-              
-            const ethicalRating = reviews.length > 0 
-              ? reviews.reduce((sum: number, review: any) => sum + (review.safety_rating || 0), 0) / reviews.length
-              : 0;
-              
-            const diplomaticRating = reviews.length > 0 
-              ? reviews.reduce((sum: number, review: any) => sum + (review.organization_rating || 0), 0) / reviews.length
-              : 0;
-
-            return {
-              ...event,
-              rating: parseFloat(rating.toFixed(1)),
-              reviews: reviews.length,
-              technicalRating: parseFloat(technicalRating.toFixed(1)),
-              ethicalRating: parseFloat(ethicalRating.toFixed(1)),
-              diplomaticRating: parseFloat(diplomaticRating.toFixed(1)),
-              image: event.image || "/placeholder.svg"
-            };
-          })
-        );
-
-        setEvents(eventsWithRatings);
+        setEvents(Array.from(eventMap.values()));
       } catch (err) {
-        console.error("Failed to fetch events:", err);
+        console.error("Failed to fetch reviewed events:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchEvents();
-  }, [searchQuery, refreshKey]); // Add refreshKey as dependency
+    fetchEvaluatedEvents();
+  }, [searchQuery, refreshKey]);
 
-  // If we don't have events from the database yet, use our mock data
-  const mockEvents = [
-    {
-      id: "mock-1",
-      title: "GEP - Grupo de Estudos em Piercing",
-      type: "Conferência",
-      image: "/placeholder.svg",
-      location: "São Paulo, SP",
-      rating: 4.8,
-      reviews: 56,
-      technicalRating: 4,
-      ethicalRating: 3,
-      diplomaticRating: 5
-    },
-    {
-      id: "mock-2",
-      title: "Expo Piercing Brasil",
-      type: "Exposição",
-      image: "/placeholder.svg",
-      location: "Rio de Janeiro, RJ",
-      rating: 4.6,
-      reviews: 42,
-      technicalRating: 3,
-      ethicalRating: 5,
-      diplomaticRating: 4
-    }
-  ];
-
-  const displayEvents = events.length > 0 ? events : mockEvents;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {loading ? (
-        <div className="col-span-2 flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    <div className="space-y-6">
+      {events.length > 0 ? (
+        <div className="space-y-8">
+          {events.map((event) => (
+            <div key={event.id} className="space-y-4">
+              <div className="border-b border-border pb-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold">{event.name}</h3>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>{event.reviewCount} {event.reviewCount === 1 ? "avaliação" : "avaliações"}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-400">★</span>
+                        <span>{event.averageRating.toFixed(1)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onAddReview("event")}
+                    className="bg-gradient-to-r from-piercing-purple to-piercing-pink text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Avaliar Evento
+                  </button>
+                </div>
+              </div>
+              
+              <ReviewsList 
+                type="event" 
+                reviews={undefined}
+                refreshKey={refreshKey}
+                onAddReview={() => onAddReview("event")}
+              />
+            </div>
+          ))}
         </div>
-      ) : displayEvents.length > 0 ? (
-        displayEvents.map((event, index) => (
-          <EventCard 
-            key={event.id || index}
-            id={event.id}
-            title={event.title}
-            type={event.type}
-            image={event.image}
-            location={event.location}
-            rating={event.rating}
-            reviews={event.reviews}
-            technicalRating={event.technicalRating || 0}
-            ethicalRating={event.ethicalRating || 0}
-            diplomaticRating={event.diplomaticRating || 0}
-            onAddReview={() => onAddReview("event")}
-            refreshKey={refreshKey}
-          />
-        ))
       ) : (
-        <div className="col-span-2 text-center py-12">
-          <p className="text-muted-foreground">Nenhum evento encontrado.</p>
+        <div className="text-center py-12">
+          <div className="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a4 4 0 118 0v4M3 11h18l-1.2 8.4a2 2 0 01-2 1.6H6.2a2 2 0 01-2-1.6L3 11z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium mb-2">Nenhum evento avaliado ainda</h3>
+          <p className="text-muted-foreground mb-6">
+            {searchQuery ? "Nenhum evento encontrado para sua busca." : "Seja o primeiro a avaliar um evento e compartilhe sua experiência com a comunidade."}
+          </p>
+          <button
+            onClick={() => onAddReview("event")}
+            className="bg-gradient-to-r from-piercing-purple to-piercing-pink text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Avaliar Primeiro Evento
+          </button>
         </div>
       )}
     </div>
