@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/sonner';
 interface UseSupabaseReviewsParams {
   type: 'event' | 'supplier';
   entityId?: string;
-  refreshKey?: number; // Add refreshKey parameter
+  refreshKey?: number;
 }
 
 export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupabaseReviewsParams) {
@@ -24,7 +24,6 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
       
       let query = supabase.from('reviews').select(`
         id,
-        title,
         comment,
         overall_rating,
         environment_rating,
@@ -36,7 +35,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         user_id,
         event_id,
         supplier_id,
-        profiles(full_name, avatar_url)
+        event_name
       `);
 
       // Add filter based on type
@@ -47,7 +46,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
           query = query.eq('supplier_id', entityId);
         }
       } else if (type === 'event') {
-        query = query.not('event_id', 'is', null);
+        query = query.not('event_name', 'is', null);
       } else {
         query = query.not('supplier_id', 'is', null);
       }
@@ -61,8 +60,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         
         const formattedReviews: Review[] = data.map((item: any) => ({
           id: item.id,
-          author: item.profiles?.full_name || 'Usuário anônimo',
-          authorAvatar: item.profiles?.avatar_url,
+          author: 'Usuário anônimo', // Simplified since we don't have profiles
+          authorAvatar: undefined,
           date: new Date(item.created_at).toLocaleDateString('pt-BR'),
           rating: item.overall_rating,
           comment: item.comment,
@@ -85,9 +84,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
     } finally {
       setLoading(false);
     }
-  }, [type, entityId, refreshKey]); // Add refreshKey as dependency
+  }, [type, entityId, refreshKey]);
 
-  // Function to manually refresh reviews
   const refreshReviews = useCallback(() => {
     fetchReviews();
   }, [fetchReviews]);
@@ -95,7 +93,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
   useEffect(() => {
     console.log("useSupabaseReviews - refreshKey changed:", refreshKey);
     fetchReviews();
-  }, [fetchReviews]); // This will run when refreshKey changes because fetchReviews depends on it
+  }, [fetchReviews]);
 
   return { reviews, loading, error, refreshReviews };
 }

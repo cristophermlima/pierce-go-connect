@@ -8,14 +8,13 @@ interface ReviewsListProps {
   type: "event" | "supplier";
   entityId?: string;  
   onAddReview?: () => void;
-  reviews?: Review[];  // Optional prop for passing reviews directly
-  refreshKey?: number; // Add refreshKey prop to trigger refresh
+  reviews?: Review[];
+  refreshKey?: number;
 }
 
 export default function ReviewsList({ type, entityId, onAddReview, reviews: passedReviews, refreshKey = 0 }: ReviewsListProps) {
   const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
   
-  // Use refreshKey to trigger data refresh when it changes
   const { reviews: fetchedReviews, loading } = useSupabaseReviews({ 
     type, 
     entityId,
@@ -24,7 +23,6 @@ export default function ReviewsList({ type, entityId, onAddReview, reviews: pass
   
   console.log(`ReviewsList - ${type} with ID ${entityId || 'all'}, refreshKey: ${refreshKey}, reviews count:`, fetchedReviews?.length);
   
-  // Use passed reviews if provided, otherwise use fetched reviews
   const reviews = passedReviews || fetchedReviews;
   
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -83,12 +81,14 @@ export default function ReviewsList({ type, entityId, onAddReview, reviews: pass
           <p className="text-muted-foreground mb-4">
             Ainda não há avaliações para este {type === "event" ? "evento" : "fornecedor"}.
           </p>
-          <Button
-            onClick={onAddReview}
-            className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
-          >
-            Seja o primeiro a avaliar
-          </Button>
+          {onAddReview && (
+            <Button
+              onClick={onAddReview}
+              className="bg-gradient-to-r from-piercing-purple to-piercing-pink"
+            >
+              Seja o primeiro a avaliar
+            </Button>
+          )}
         </div>
       )}
     </div>
