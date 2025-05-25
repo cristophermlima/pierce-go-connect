@@ -18,15 +18,13 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
       try {
         setLoading(true);
         
-        // Fetch unique events that have reviews
         let query = supabase
           .from('reviews')
           .select(`
             event_name,
             event_id,
             overall_rating,
-            created_at,
-            profiles(full_name, avatar_url)
+            created_at
           `)
           .not('event_name', 'is', null);
         
@@ -41,7 +39,6 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
           return;
         }
 
-        // Group reviews by event name to get unique events
         const eventMap = new Map();
         data?.forEach((review: any) => {
           const eventName = review.event_name;
@@ -108,7 +105,6 @@ export function EventsTab({ onAddReview, searchQuery = "", refreshKey = 0 }: Eve
               
               <ReviewsList 
                 type="event" 
-                reviews={undefined}
                 refreshKey={refreshKey}
                 onAddReview={() => onAddReview("event")}
               />

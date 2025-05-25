@@ -8,31 +8,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import AddEvaluationForm from "@/components/AddEvaluationForm";
 import EventsTab from "@/components/evaluations/EventsTab";
 import SuppliersTab from "@/components/evaluations/SuppliersTab";
-import { useEvaluationState } from "@/hooks/useEvaluationState";
 import { toast } from "@/components/ui/sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function EvaluationsPage() {
-  const {
-    searchQuery,
-    setSearchQuery,
-    showAddEvaluationDialog,
-    setShowAddEvaluationDialog,
-    evaluationType,
-    openAddEvaluationDialog
-  } = useEvaluationState();
-  
-  const [refreshKey, setRefreshKey] = useState(0); // Add a refreshKey state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAddEvaluationDialog, setShowAddEvaluationDialog] = useState(false);
+  const [evaluationType, setEvaluationType] = useState<"event" | "supplier">("event");
+  const [refreshKey, setRefreshKey] = useState(0);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const openAddEvaluationDialog = (type: "event" | "supplier") => {
+    if (!user) {
+      toast.error("Você precisa estar logado para avaliar");
+      navigate('/auth', { state: { from: location.pathname } });
+      return;
+    }
+    setEvaluationType(type);
+    setShowAddEvaluationDialog(true);
+  };
 
   const handleFormSubmit = (reviewData: any) => {
-    // Log para debug
     console.log("Nova avaliação submetida:", reviewData);
     
     setShowAddEvaluationDialog(false);
     toast.success("Avaliação enviada com sucesso!");
     
-    // Increment the refresh key to trigger a refresh
     setRefreshKey(prevKey => prevKey + 1);
     console.log("RefreshKey incrementado:", refreshKey + 1);
   };
@@ -78,7 +83,7 @@ export default function EvaluationsPage() {
                 <EventsTab 
                   onAddReview={(type) => openAddEvaluationDialog(type)} 
                   searchQuery={searchQuery} 
-                  refreshKey={refreshKey} // Pass refreshKey to EventsTab
+                  refreshKey={refreshKey}
                 />
               </TabsContent>
               
@@ -86,7 +91,7 @@ export default function EvaluationsPage() {
                 <SuppliersTab 
                   onAddReview={(type) => openAddEvaluationDialog(type)} 
                   searchQuery={searchQuery} 
-                  refreshKey={refreshKey} // Pass refreshKey to SuppliersTab
+                  refreshKey={refreshKey}
                 />
               </TabsContent>
             </Tabs>
@@ -94,7 +99,6 @@ export default function EvaluationsPage() {
         </div>
       </div>
 
-      {/* Add Evaluation Dialog */}
       <Dialog open={showAddEvaluationDialog} onOpenChange={setShowAddEvaluationDialog}>
         <DialogContent className={`sm:max-w-2xl ${isMobile ? 'p-4 h-[90vh] overflow-scroll' : ''}`}>
           <DialogHeader>
