@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { StarRating, CategoryStarRating } from "./StarRating";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export interface Review {
   id: string;
@@ -25,13 +29,42 @@ export interface Review {
 interface ReviewCardProps {
   review: Review;
   type: "event" | "supplier";
+  onReviewDeleted?: () => void;
 }
 
-export function ReviewCard({ review, type }: ReviewCardProps) {
+export function ReviewCard({ review, type, onReviewDeleted }: ReviewCardProps) {
   const [isHelpful, setIsHelpful] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { isAdmin } = useIsAdmin();
   
   const handleHelpfulClick = () => {
     setIsHelpful(!isHelpful);
+  };
+
+  const handleDeleteReview = async () => {
+    if (!isAdmin) return;
+
+    if (!confirm('Tem certeza que deseja excluir esta avaliação?')) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', review.id);
+
+      if (error) throw error;
+
+      toast.success('Avaliação excluída com sucesso');
+      if (onReviewDeleted) {
+        onReviewDeleted();
+      }
+    } catch (error: any) {
+      console.error('Error deleting review:', error);
+      toast.error('Erro ao excluir avaliação');
+    } finally {
+      setIsDeleting(false);
+    }
   };
   
   const getInitials = (name: string) => {
@@ -59,7 +92,20 @@ export function ReviewCard({ review, type }: ReviewCardProps) {
             <div className="text-sm text-muted-foreground">{review.date}</div>
           </div>
         </div>
-        <StarRating rating={review.rating} />
+        <div className="flex items-center gap-2">
+          <StarRating rating={review.rating} />
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteReview}
+              disabled={isDeleting}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+            </Button>
+          )}
+        </div>
       </div>
       
       {type === "event" && (review.technicalRating || review.ethicalRating || review.diplomaticRating) && (

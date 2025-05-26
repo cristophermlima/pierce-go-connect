@@ -35,7 +35,8 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         user_id,
         event_id,
         supplier_id,
-        event_name
+        event_name,
+        supplier_name
       `);
 
       // Add filter based on type
@@ -48,7 +49,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
       } else if (type === 'event') {
         query = query.not('event_name', 'is', null);
       } else {
-        query = query.not('supplier_id', 'is', null);
+        query = query.not('supplier_name', 'is', null);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -60,7 +61,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         
         const formattedReviews: Review[] = data.map((item: any) => ({
           id: item.id,
-          author: 'Usuário anônimo', // Simplified since we don't have profiles
+          author: 'Usuário anônimo',
           authorAvatar: undefined,
           date: new Date(item.created_at).toLocaleDateString('pt-BR'),
           rating: item.overall_rating,

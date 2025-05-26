@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,22 +80,22 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
         }
       }
       
-      // Prepare review data
+      // Prepare review data - simplified to match table structure
       const reviewData: any = {
         user_id: user.id,
         comment,
         overall_rating: rating,
         images: uploadedImageUrls,
-        organization_rating: organizationRating,
+        organization_rating: organizationRating || null,
       };
       
       if (type === 'event') {
         reviewData.event_name = eventName;
-        reviewData.environment_rating = locationRating;
-        reviewData.safety_rating = valueRating;
+        reviewData.environment_rating = locationRating || null;
+        reviewData.safety_rating = valueRating || null;
       } else {
         reviewData.supplier_name = supplierName;
-        reviewData.quality_rating = valueRating;
+        reviewData.quality_rating = valueRating || null;
       }
       
       // Submit to Supabase
@@ -106,6 +105,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
         .select();
         
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
       
@@ -116,6 +116,18 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       }
       
       toast.success(`Avaliação enviada com sucesso!`);
+      
+      // Reset form
+      setRating(0);
+      setEventName("");
+      setSupplierName("");
+      setComment("");
+      setOrganizationRating(0);
+      setLocationRating(0);
+      setValueRating(0);
+      setImages([]);
+      setPreviewImages([]);
+      
     } catch (error: any) {
       toast.error(`Erro ao enviar avaliação: ${error.message}`);
       console.error(error);
@@ -194,7 +206,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             <div>
               <label className="block text-sm font-medium mb-1 text-white">Nome do Evento</label>
               <Input 
-                placeholder="Selecione um evento" 
+                placeholder="Digite o nome do evento" 
                 value={eventName} 
                 onChange={(e) => setEventName(e.target.value)}
                 className="bg-muted border-border"
@@ -205,7 +217,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             <div>
               <label className="block text-sm font-medium mb-1 text-white">Nome do Fornecedor</label>
               <Input 
-                placeholder="Selecione um fornecedor" 
+                placeholder="Digite o nome do fornecedor" 
                 value={supplierName} 
                 onChange={(e) => setSupplierName(e.target.value)}
                 className="bg-muted border-border"
@@ -214,23 +226,6 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-white">Seu Nome (opcional)</label>
-            <Input 
-              placeholder="Digite seu nome para avaliar anonimamente" 
-              className="bg-muted border-border"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1 text-white">Seu Email (opcional)</label>
-            <Input 
-              type="email"
-              placeholder="Não será exibido publicamente" 
-              className="bg-muted border-border"
-            />
-          </div>
-          
           <div>
             <label className="block text-sm font-medium mb-2 text-white">Avaliação Geral</label>
             <StarRating value={rating} onChange={setRating} />
@@ -244,14 +239,14 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
             
             <div>
               <label className="block text-sm font-medium mb-1 text-white">
-                {type === "event" ? "Localização" : "Localização"}
+                {type === "event" ? "Ambiente" : "Localização"}
               </label>
               <StarRating value={locationRating} onChange={setLocationRating} />
             </div>
             
             <div>
               <label className="block text-sm font-medium mb-1 text-white">
-                {type === "event" ? "Valor" : "Valor"}
+                {type === "event" ? "Segurança" : "Qualidade/Valor"}
               </label>
               <StarRating value={valueRating} onChange={setValueRating} />
             </div>

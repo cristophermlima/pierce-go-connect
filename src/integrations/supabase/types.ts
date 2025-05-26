@@ -46,6 +46,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
+          is_admin: boolean | null
           is_event_organizer: boolean | null
           is_supplier: boolean | null
         }
@@ -55,6 +56,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          is_admin?: boolean | null
           is_event_organizer?: boolean | null
           is_supplier?: boolean | null
         }
@@ -64,6 +66,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          is_admin?: boolean | null
           is_event_organizer?: boolean | null
           is_supplier?: boolean | null
         }
@@ -84,7 +87,7 @@ export type Database = {
           quality_rating: number | null
           safety_rating: number | null
           supplier_id: string | null
-          title: string
+          supplier_name: string | null
           user_id: string
         }
         Insert: {
@@ -101,7 +104,7 @@ export type Database = {
           quality_rating?: number | null
           safety_rating?: number | null
           supplier_id?: string | null
-          title: string
+          supplier_name?: string | null
           user_id: string
         }
         Update: {
@@ -118,7 +121,7 @@ export type Database = {
           quality_rating?: number | null
           safety_rating?: number | null
           supplier_id?: string | null
-          title?: string
+          supplier_name?: string | null
           user_id?: string
         }
         Relationships: [

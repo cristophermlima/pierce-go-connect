@@ -15,7 +15,7 @@ interface ReviewsListProps {
 export default function ReviewsList({ type, entityId, onAddReview, reviews: passedReviews, refreshKey = 0 }: ReviewsListProps) {
   const [sortBy, setSortBy] = useState<"recent" | "highest" | "lowest">("recent");
   
-  const { reviews: fetchedReviews, loading } = useSupabaseReviews({ 
+  const { reviews: fetchedReviews, loading, refreshReviews } = useSupabaseReviews({ 
     type, 
     entityId,
     refreshKey 
@@ -34,6 +34,10 @@ export default function ReviewsList({ type, entityId, onAddReview, reviews: pass
       return a.rating - b.rating;
     }
   });
+
+  const handleReviewDeleted = useCallback(() => {
+    refreshReviews();
+  }, [refreshReviews]);
 
   if (loading) {
     return (
@@ -72,7 +76,12 @@ export default function ReviewsList({ type, entityId, onAddReview, reviews: pass
           
           <div className="space-y-6">
             {sortedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} type={type} />
+              <ReviewCard 
+                key={review.id} 
+                review={review} 
+                type={type} 
+                onReviewDeleted={handleReviewDeleted}
+              />
             ))}
           </div>
         </>
