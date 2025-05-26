@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, User, Calendar, MapPin, Star, FileText, CreditCard, LogOut } from "lucide-react";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -116,7 +116,7 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
+                    <DropdownMenuItem onClick={signOut} className="cursor-pointer text-red-600 focus:text-red-600">
                       <LogOut className="w-4 h-4 mr-2" />
                       Sair
                     </DropdownMenuItem>
@@ -224,7 +224,7 @@ export default function Navbar() {
                           variant="outline"
                           className="w-full text-red-600 border-red-200 hover:bg-red-50"
                           onClick={() => {
-                            logout();
+                            signOut();
                             setIsOpen(false);
                           }}
                         >
