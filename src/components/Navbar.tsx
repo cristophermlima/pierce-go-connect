@@ -1,274 +1,258 @@
 
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuItem
-} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User, Calendar, MapPin, Star, FileText, CreditCard, LogOut } from "lucide-react";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const getInitials = (name?: string | null) => {
-    if (!name) return "U";
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
+  const isActive = (path: string) => location.pathname === path;
 
-  const handleSignOut = async () => {
-    await signOut();
-    setIsMenuOpen(false);
-  };
+  const navigationItems = [
+    { href: "/eventos", label: "Agenda", icon: Calendar },
+    { href: "/fornecedores", label: "Fornecedores", icon: MapPin },
+    { href: "/avaliacoes", label: "Avaliações", icon: Star },
+    { href: "/viagens", label: "Viagens", icon: FileText },
+  ];
 
-  const navigateTo = (path: string) => {
-    navigate(path);
-    setIsMenuOpen(false);
-  };
+  const userMenuItems = [
+    { href: "/dashboard", label: "Dashboard", icon: User },
+    { href: "/agenda", label: "Minha Agenda", icon: Calendar },
+    { href: "/perfil", label: "Perfil", icon: User },
+    { href: "/planos", label: "Assinatura", icon: CreditCard },
+  ];
+
+  const NavItems = ({ mobile = false, onItemClick }: { mobile?: boolean; onItemClick?: () => void }) => (
+    <>
+      {navigationItems.map((item) => (
+        <Link
+          key={item.href}
+          to={item.href}
+          className={`${
+            isActive(item.href)
+              ? "text-primary font-medium"
+              : "text-muted-foreground hover:text-primary"
+          } transition-colors text-sm lg:text-base ${mobile ? "block py-2" : ""}`}
+          onClick={onItemClick}
+        >
+          {mobile && <item.icon className="w-4 h-4 inline mr-2" />}
+          {item.label}
+        </Link>
+      ))}
+    </>
+  );
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
-      <div className="container flex items-center justify-between h-16 px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-xl md:text-2xl font-bold text-gradient">Piercer Go</span>
-        </Link>
-        
-        {/* Mobile menu button */}
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-foreground md:hidden"
-          aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-        >
-          {isMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-menu">
-              <line x1="4" x2="20" y1="12" y2="12"></line>
-              <line x1="4" x2="20" y1="6" y2="6"></line>
-              <line x1="4" x2="20" y1="18" y2="18"></line>
-            </svg>
-          )}
-        </button>
-        
-        {/* Desktop navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to="/eventos" className="text-lg font-medium hover:text-primary transition-colors">
-            Agenda
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="container px-4 lg:px-6">
+        <div className="flex h-14 lg:h-16 items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">P</span>
+            </div>
+            <span className="font-bold text-lg lg:text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
+              PierceConnect
+            </span>
           </Link>
-          <Link to="/avaliacoes" className="text-lg font-medium hover:text-primary transition-colors">
-            Score Piercing
-          </Link>
-          <Link to="/viagens" className="text-lg font-medium hover:text-primary transition-colors">
-            Viagens
-          </Link>
-          <Link to="/fornecedores" className="text-lg font-medium hover:text-primary transition-colors">
-            Fornecedores
-          </Link>
-          
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
-                    {profile?.avatar_url ? (
-                      <AvatarImage src={profile.avatar_url} alt={profile.full_name || ''} />
-                    ) : (
-                      <AvatarFallback>{getInitials(profile?.full_name)}</AvatarFallback>
-                    )}
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-medium leading-none">{profile?.full_name || 'Usuário'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigateTo('/dashboard')}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><line x1="3" x2="21" y1="9" y2="9"></line><line x1="9" x2="9" y1="21" y2="9"></line></svg>
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigateTo('/perfil')}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigateTo('/avaliacoes')}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                  Minhas Avaliações
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigateTo('/viagens')}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M3 7h2a1 1 0 0 0 1-1V5h2v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V5h2v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V5h1a1 1 0 0 1 1 1v4H3V7Z"></path><path d="M3 15v-3h18v3"></path><path d="M3 12v8a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-8"></path></svg>
-                  Minhas Viagens
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigateTo('/planos')}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M12 8v3"></path><path d="M12 16h.01"></path><path d="M6 16h.01"></path><path d="M18 16h.01"></path><path d="M18 11h.01"></path><path d="M6 11h.01"></path></svg>
-                  Meu Plano
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                  Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <>
-              <Link to="/login" className="text-lg font-medium hover:text-primary transition-colors">
-                Entrar
-              </Link>
-              <Link to="/cadastro">
-                <Button className="button-glow bg-gradient-to-r from-piercing-purple to-piercing-pink">
-                  Cadastrar
-                </Button>
-              </Link>
-            </>
-          )}
-        </nav>
-        
-        {/* Mobile navigation */}
-        {isMenuOpen && (
-          <div className="absolute top-16 inset-x-0 bg-background/95 backdrop-blur-lg border-b border-border md:hidden animate-fade-in">
-            <nav className="flex flex-col py-4 px-4 space-y-4">
-              <Link 
-                to="/eventos"
-                onClick={() => setIsMenuOpen(false)}
-                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
-              >
-                Agenda
-              </Link>
-              <Link 
-                to="/avaliacoes"
-                onClick={() => setIsMenuOpen(false)}
-                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
-              >
-                Score Piercing
-              </Link>
-              <Link 
-                to="/viagens"
-                onClick={() => setIsMenuOpen(false)}
-                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
-              >
-                Viagens
-              </Link>
-              <Link 
-                to="/fornecedores"
-                onClick={() => setIsMenuOpen(false)}
-                className="px-4 py-2 text-lg hover:bg-muted rounded-md"
-              >
-                Fornecedores
-              </Link>
-              
-              {user ? (
-                <>
-                  <div className="px-4 py-2 border-t border-border">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Avatar className="h-8 w-8">
-                        {profile?.avatar_url ? (
-                          <AvatarImage src={profile.avatar_url} alt={profile.full_name || ''} />
-                        ) : (
-                          <AvatarFallback>{getInitials(profile?.full_name)}</AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="text-sm">
-                        <p className="font-medium">{profile?.full_name || 'Usuário'}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1 mt-3">
-                      <Link 
-                        to="/dashboard"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-muted rounded-md"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><line x1="3" x2="21" y1="9" y2="9"></line><line x1="9" x2="9" y1="21" y2="9"></line></svg>
-                        Dashboard
-                      </Link>
-                      <Link 
-                        to="/perfil"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-muted rounded-md"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        Meu Perfil
-                      </Link>
-                      <Link 
-                        to="/avaliacoes"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-muted rounded-md"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"></path><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                        Minhas Avaliações
-                      </Link>
-                      <Link 
-                        to="/viagens"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-muted rounded-md"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M3 7h2a1 1 0 0 0 1-1V5h2v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V5h2v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V5h1a1 1 0 0 1 1 1v4H3V7Z"></path><path d="M3 15v-3h18v3"></path><path d="M3 12v8a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-8"></path></svg>
-                        Minhas Viagens
-                      </Link>
-                      <Link 
-                        to="/planos"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm hover:bg-muted rounded-md"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M12 8v3"></path><path d="M12 16h.01"></path><path d="M6 16h.01"></path><path d="M18 16h.01"></path><path d="M18 11h.01"></path><path d="M6 11h.01"></path></svg>
-                        Meu Plano
-                      </Link>
-                    </div>
-                    
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={handleSignOut}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        Sair
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col space-y-2 px-4">
-                  <Link 
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="px-4 py-2 text-center rounded-md border border-input"
-                  >
-                    Entrar
-                  </Link>
-                  <Link 
-                    to="/cadastro"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="px-4 py-2 text-center rounded-md bg-gradient-to-r from-piercing-purple to-piercing-pink text-white"
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            <NavItems />
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center space-x-2 lg:space-x-4">
+            {user ? (
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                <Link to="/cadastrar" className="hidden lg:block">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="text-xs lg:text-sm"
                   >
                     Cadastrar
-                  </Link>
+                  </Button>
+                </Link>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
+                        <AvatarFallback>
+                          {user.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-sm" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        <p className="font-medium text-sm">{user.user_metadata?.full_name || "Usuário"}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    {userMenuItems.map((item) => (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link to={item.href} className="flex items-center gap-2 cursor-pointer">
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <div className="hidden lg:flex items-center space-x-2">
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">Entrar</Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="sm" className="bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                    Cadastrar
+                  </Button>
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile menu */}
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 bg-background/95 backdrop-blur-sm">
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center space-x-2 mb-6">
+                    <div className="w-8 h-8 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">P</span>
+                    </div>
+                    <span className="font-bold text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
+                      PierceConnect
+                    </span>
+                  </div>
+
+                  <div className="flex-1 space-y-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                        Navegação
+                      </h4>
+                      <div className="space-y-1">
+                        <NavItems mobile onItemClick={() => setIsOpen(false)} />
+                      </div>
+                    </div>
+
+                    {user && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                          Minha Conta
+                        </h4>
+                        <div className="space-y-1">
+                          {userMenuItems.map((item) => (
+                            <Link
+                              key={item.href}
+                              to={item.href}
+                              className="flex items-center gap-2 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              <item.icon className="w-4 h-4" />
+                              {item.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                        Ações
+                      </h4>
+                      <Link
+                        to="/cadastrar"
+                        className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <FileText className="w-4 h-4 inline mr-2" />
+                        Cadastrar Evento/Loja
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Mobile auth section */}
+                  <div className="border-t pt-4 mt-4">
+                    {user ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
+                            <AvatarFallback>
+                              {user.email?.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {user.user_metadata?.full_name || "Usuário"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                          onClick={() => {
+                            logout();
+                            setIsOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sair
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Link to="/login" onClick={() => setIsOpen(false)}>
+                          <Button variant="outline" className="w-full">
+                            Entrar
+                          </Button>
+                        </Link>
+                        <Link to="/register" onClick={() => setIsOpen(false)}>
+                          <Button className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                            Cadastrar-se
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </nav>
+              </SheetContent>
+            </Sheet>
           </div>
-        )}
+        </div>
       </div>
-    </header>
+    </nav>
   );
 }
