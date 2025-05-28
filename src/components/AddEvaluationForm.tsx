@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,8 +24,8 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
   const [supplierName, setSupplierName] = useState("");
   const [comment, setComment] = useState("");
   const [organizationRating, setOrganizationRating] = useState(0);
-  const [locationRating, setLocationRating] = useState(0);
-  const [valueRating, setValueRating] = useState(0);
+  const [environmentRating, setEnvironmentRating] = useState(0); // Para eventos: Ambiente / Para fornecedores: Localização
+  const [safetyRating, setSafetyRating] = useState(0); // Para eventos: Segurança / Para fornecedores: Qualidade/Valor
   const [images, setImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +81,7 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
         }
       }
       
-      // Prepare review data - simplified to match table structure
+      // Prepare review data with correct field mapping
       const reviewData: any = {
         user_id: user.id,
         comment,
@@ -91,12 +92,16 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       
       if (type === 'event') {
         reviewData.event_name = eventName;
-        reviewData.environment_rating = locationRating || null;
-        reviewData.safety_rating = valueRating || null;
+        // Correct mapping for events: environment_rating = Ambiente, safety_rating = Segurança
+        reviewData.environment_rating = environmentRating || null;
+        reviewData.safety_rating = safetyRating || null;
       } else {
         reviewData.supplier_name = supplierName;
-        reviewData.quality_rating = valueRating || null;
+        // For suppliers: environment_rating can be location, quality_rating for quality/value
+        reviewData.quality_rating = safetyRating || null;
       }
+      
+      console.log('Submitting review data:', reviewData);
       
       // Submit to Supabase
       const { error, data } = await supabase
@@ -123,8 +128,8 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
       setSupplierName("");
       setComment("");
       setOrganizationRating(0);
-      setLocationRating(0);
-      setValueRating(0);
+      setEnvironmentRating(0);
+      setSafetyRating(0);
       setImages([]);
       setPreviewImages([]);
       
@@ -241,14 +246,14 @@ export default function AddEvaluationForm({ type, onSubmit, onCancel, initialEve
               <label className="block text-sm font-medium mb-1 text-white">
                 {type === "event" ? "Ambiente" : "Localização"}
               </label>
-              <StarRating value={locationRating} onChange={setLocationRating} />
+              <StarRating value={environmentRating} onChange={setEnvironmentRating} />
             </div>
             
             <div>
               <label className="block text-sm font-medium mb-1 text-white">
                 {type === "event" ? "Segurança" : "Qualidade/Valor"}
               </label>
-              <StarRating value={valueRating} onChange={setValueRating} />
+              <StarRating value={safetyRating} onChange={setSafetyRating} />
             </div>
           </div>
           

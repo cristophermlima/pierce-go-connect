@@ -66,6 +66,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
           date: new Date(item.created_at).toLocaleDateString('pt-BR'),
           rating: item.overall_rating,
           comment: item.comment,
+          // Correct mapping for events: Técnica=environment, Ética=safety, Diplomacia=organization
           technicalRating: type === 'event' ? item.environment_rating : undefined,
           ethicalRating: type === 'event' ? item.safety_rating : undefined,
           diplomaticRating: type === 'event' ? item.organization_rating : undefined,

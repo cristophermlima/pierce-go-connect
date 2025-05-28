@@ -65,7 +65,7 @@ export default function Navbar() {
               <span className="text-white font-bold text-sm">P</span>
             </div>
             <span className="font-bold text-lg lg:text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
-              PierceConnect
+              PiercerGo
             </span>
           </Link>
 
@@ -150,7 +150,7 @@ export default function Navbar() {
                       <span className="text-white font-bold text-sm">P</span>
                     </div>
                     <span className="font-bold text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
-                      PierceConnect
+                      PiercerGo
                     </span>
                   </div>
 
