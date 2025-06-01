@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import PricingCard from "@/components/PricingCard";
@@ -18,8 +17,19 @@ export default function PlansPage() {
       features: [
         "Visualizar eventos",
         "Avaliar eventos e fornecedores",
-        "Agenda pessoal básica",
         "Acesso limitado a conteúdo"
+      ]
+    },
+    {
+      title: "Agenda Pessoal",
+      price: billingCycle === "monthly" ? 5.9 : 59,
+      period: billingCycle === "monthly" ? "mês" : "ano",
+      description: "Ideal para organizar sua agenda pessoal",
+      features: [
+        "Tudo do plano gratuito",
+        "Agenda pessoal completa",
+        "Lembretes e notificações",
+        "Sincronização de eventos"
       ]
     },
     {
@@ -28,7 +38,7 @@ export default function PlansPage() {
       period: billingCycle === "monthly" ? "mês" : "ano",
       description: "Para profissionais do piercing",
       features: [
-        "Tudo do plano gratuito",
+        "Tudo do plano Agenda Pessoal",
         "Agenda avançada",
         "Planejamento de viagens",
         "Avaliações detalhadas",
@@ -146,7 +156,7 @@ export default function PlansPage() {
             </div>
 
             <TabsContent value="users">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {userPlans.map((plan, index) => (
                   <PricingCard key={index} {...plan} />
                 ))}

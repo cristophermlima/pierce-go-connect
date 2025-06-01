@@ -48,7 +48,11 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         }
       } else if (type === 'event') {
         // For events tab: only show reviews that have event_name and NO supplier_name
-        query = query.not('event_name', 'is', null).is('supplier_name', null);
+        // Also exclude specific incorrect entries like "Angel Piercing" in events
+        query = query
+          .not('event_name', 'is', null)
+          .is('supplier_name', null)
+          .neq('event_name', 'Angel Piercing'); // Remove Angel Piercing from events
       } else {
         // For suppliers tab: only show reviews that have supplier_name and NO event_name
         query = query.not('supplier_name', 'is', null).is('event_name', null);

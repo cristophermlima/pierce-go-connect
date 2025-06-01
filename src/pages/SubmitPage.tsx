@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/MainLayout";
@@ -13,10 +12,15 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
+import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export default function SubmitPage() {
   const [eventLoading, setEventLoading] = useState(false);
   const [shopLoading, setShopLoading] = useState(false);
+  const [showEventPlans, setShowEventPlans] = useState(false);
+  const [showShopPlans, setShowShopPlans] = useState(false);
+  const navigate = useNavigate();
 
   const handleEventSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +29,7 @@ export default function SubmitPage() {
     try {
       // In a real app, we would submit to an API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Evento enviado para aprovação com sucesso!");
-      // Reset form here
+      setShowEventPlans(true);
     } catch (error) {
       toast.error("Erro ao enviar o evento. Tente novamente.");
     } finally {
@@ -41,14 +44,150 @@ export default function SubmitPage() {
     try {
       // In a real app, we would submit to an API
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Loja enviada para aprovação com sucesso!");
-      // Reset form here
+      setShowShopPlans(true);
     } catch (error) {
       toast.error("Erro ao enviar a loja. Tente novamente.");
     } finally {
       setShopLoading(false);
     }
   };
+
+  const handlePlanSelection = (planType: string) => {
+    toast.success(`Plano ${planType} selecionado! Redirecionando para pagamento...`);
+    // Here would redirect to payment
+    setTimeout(() => {
+      navigate('/planos');
+    }, 1500);
+  };
+
+  if (showEventPlans) {
+    return (
+      <MainLayout>
+        <div className="container py-16 max-w-4xl">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold mb-3">Escolha o Plano para seu Evento</h1>
+            <p className="text-xl text-muted-foreground">
+              Selecione o plano ideal para dar visibilidade ao seu evento
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-2">Gratuito</h3>
+              <p className="text-2xl font-bold mb-4">R$ 0</p>
+              <ul className="space-y-2 mb-6">
+                <li>• Listagem básica</li>
+                <li>• Visibilidade limitada</li>
+                <li>• Sem destaque</li>
+              </ul>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handlePlanSelection('Gratuito')}
+              >
+                Escolher Gratuito
+              </Button>
+            </Card>
+            
+            <Card className="p-6 border-primary">
+              <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-sm w-fit mb-2">
+                Recomendado
+              </div>
+              <h3 className="text-xl font-bold mb-2">Premium</h3>
+              <p className="text-2xl font-bold mb-4">R$ 99 <span className="text-sm font-normal">/mês</span></p>
+              <ul className="space-y-2 mb-6">
+                <li>• Destaque na página inicial</li>
+                <li>• Posição privilegiada na busca</li>
+                <li>• Analytics detalhados</li>
+                <li>• Suporte prioritário</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
+                onClick={() => handlePlanSelection('Premium')}
+              >
+                Escolher Premium
+              </Button>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (showShopPlans) {
+    return (
+      <MainLayout>
+        <div className="container py-16 max-w-6xl">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold mb-3">Escolha o Plano para sua Loja</h1>
+            <p className="text-xl text-muted-foreground">
+              Selecione o plano ideal para sua loja ou estúdio
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-2">Básico</h3>
+              <p className="text-2xl font-bold mb-4">R$ 49 <span className="text-sm font-normal">/mês</span></p>
+              <ul className="space-y-2 mb-6">
+                <li>• Perfil de loja básico</li>
+                <li>• Até 10 produtos</li>
+                <li>• Avaliações de clientes</li>
+                <li>• Contato direto</li>
+              </ul>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handlePlanSelection('Básico')}
+              >
+                Escolher Básico
+              </Button>
+            </Card>
+            
+            <Card className="p-6 border-primary">
+              <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-sm w-fit mb-2">
+                Recomendado
+              </div>
+              <h3 className="text-xl font-bold mb-2">Profissional</h3>
+              <p className="text-2xl font-bold mb-4">R$ 99 <span className="text-sm font-normal">/mês</span></p>
+              <ul className="space-y-2 mb-6">
+                <li>• Produtos ilimitados</li>
+                <li>• Destaque na busca</li>
+                <li>• Múltiplas imagens</li>
+                <li>• Promoções e descontos</li>
+                <li>• Relatórios detalhados</li>
+              </ul>
+              <Button 
+                className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
+                onClick={() => handlePlanSelection('Profissional')}
+              >
+                Escolher Profissional
+              </Button>
+            </Card>
+            
+            <Card className="p-6">
+              <h3 className="text-xl font-bold mb-2">Enterprise</h3>
+              <p className="text-2xl font-bold mb-4">R$ 199 <span className="text-sm font-normal">/mês</span></p>
+              <ul className="space-y-2 mb-6">
+                <li>• API de integração</li>
+                <li>• Múltiplas lojas</li>
+                <li>• Suporte dedicado</li>
+                <li>• Treinamento personalizado</li>
+                <li>• Análises avançadas</li>
+              </ul>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handlePlanSelection('Enterprise')}
+              >
+                Escolher Enterprise
+              </Button>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -189,10 +328,10 @@ export default function SubmitPage() {
                     className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
                     disabled={eventLoading}
                   >
-                    {eventLoading ? "Enviando..." : "Enviar Evento para Aprovação"}
+                    {eventLoading ? "Enviando..." : "Continuar para Seleção de Plano"}
                   </Button>
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    * Seu evento passará por uma revisão antes de ser publicado
+                    * Você poderá escolher o plano na próxima etapa
                   </p>
                 </div>
               </form>
@@ -314,10 +453,10 @@ export default function SubmitPage() {
                     className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
                     disabled={shopLoading}
                   >
-                    {shopLoading ? "Enviando..." : "Enviar Loja para Aprovação"}
+                    {shopLoading ? "Enviando..." : "Continuar para Seleção de Plano"}
                   </Button>
                   <p className="text-xs text-muted-foreground text-center mt-2">
-                    * Seu cadastro passará por uma revisão antes de ser publicado
+                    * Você poderá escolher o plano na próxima etapa
                   </p>
                 </div>
               </form>
