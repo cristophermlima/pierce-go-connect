@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
@@ -22,7 +21,7 @@ export default function SuppliersPage() {
 
   const suppliers = [
     {
-      name: "Revolution Piercing",
+      name: "Joias Premium Brasil",
       type: "Joias e Acessórios",
       location: "Nacional",
       rating: "4.8",
@@ -30,7 +29,7 @@ export default function SuppliersPage() {
       image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=2070&auto=format&fit=crop"
     },
     {
-      name: "Angel Piercing",
+      name: "Piercing & Style",
       type: "Joias e Acessórios",
       location: "São Paulo, SP",
       rating: "4.6",
@@ -38,7 +37,7 @@ export default function SuppliersPage() {
       image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2070&auto=format&fit=crop"
     },
     {
-      name: "My Piercing",
+      name: "Equipamentos Pro",
       type: "Equipamentos",
       location: "Rio de Janeiro, RJ",
       rating: "4.9",
@@ -46,7 +45,7 @@ export default function SuppliersPage() {
       image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=2070&auto=format&fit=crop"
     },
     {
-      name: "Luvas & Cia",
+      name: "Suprimentos & Cia",
       type: "Descartáveis",
       location: "Belo Horizonte, MG",
       rating: "4.7",
@@ -54,7 +53,7 @@ export default function SuppliersPage() {
       image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?q=80&w=2070&auto=format&fit=crop"
     },
     {
-      name: "Titanium Gold",
+      name: "Elite Piercing",
       type: "Joias Premium",
       location: "Nacional",
       rating: "5.0",
@@ -62,7 +61,7 @@ export default function SuppliersPage() {
       image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2070&auto=format&fit=crop"
     },
     {
-      name: "Biossegurança Total",
+      name: "Segurança Total",
       type: "Equipamentos",
       location: "Curitiba, PR",
       rating: "4.8",
