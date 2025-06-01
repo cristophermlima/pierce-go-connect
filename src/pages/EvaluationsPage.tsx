@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import AddEvaluationForm from "@/components/AddEvaluationForm";
+import SupplierEvaluationForm from "@/components/SupplierEvaluationForm";
 import EventsTab from "@/components/evaluations/EventsTab";
 import SuppliersTab from "@/components/evaluations/SuppliersTab";
 import { toast } from "@/components/ui/sonner";
@@ -18,6 +19,7 @@ export default function EvaluationsPage() {
   const [showAddEvaluationDialog, setShowAddEvaluationDialog] = useState(false);
   const [evaluationType, setEvaluationType] = useState<"event" | "supplier">("event");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [activeTab, setActiveTab] = useState("eventos");
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -42,6 +44,10 @@ export default function EvaluationsPage() {
     console.log("RefreshKey incrementado:", refreshKey + 1);
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <MainLayout>
       <div className="container py-10">
@@ -54,7 +60,7 @@ export default function EvaluationsPage() {
           </div>
           
           <div className="mb-6">
-            <Tabs defaultValue="eventos" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <TabsList className="w-full sm:w-auto bg-muted">
                   <TabsTrigger value="eventos" className="flex-1 sm:flex-none px-4 sm:px-8 py-2">Eventos</TabsTrigger>
@@ -63,7 +69,7 @@ export default function EvaluationsPage() {
                 
                 <Button 
                   className="bg-gradient-to-r from-piercing-purple to-piercing-pink w-full sm:w-auto"
-                  onClick={() => openAddEvaluationDialog("event")}
+                  onClick={() => openAddEvaluationDialog(activeTab === "eventos" ? "event" : "supplier")}
                 >
                   Adicionar Avaliação
                 </Button>
@@ -102,17 +108,26 @@ export default function EvaluationsPage() {
       <Dialog open={showAddEvaluationDialog} onOpenChange={setShowAddEvaluationDialog}>
         <DialogContent className={`sm:max-w-2xl ${isMobile ? 'p-4 h-[90vh] overflow-scroll' : ''}`}>
           <DialogHeader>
-            <DialogTitle>Adicionar Avaliação</DialogTitle>
+            <DialogTitle>
+              {evaluationType === "event" ? "Avaliar Evento" : "Avaliar Fornecedor"}
+            </DialogTitle>
             <DialogDescription>
               Compartilhe sua experiência com a comunidade.
             </DialogDescription>
           </DialogHeader>
           <div className={isMobile ? 'max-h-[70vh] overflow-y-auto -mx-4 px-4' : ''}>
-            <AddEvaluationForm 
-              type={evaluationType} 
-              onSubmit={handleFormSubmit}
-              onCancel={() => setShowAddEvaluationDialog(false)}
-            />
+            {evaluationType === "event" ? (
+              <AddEvaluationForm 
+                type={evaluationType} 
+                onSubmit={handleFormSubmit}
+                onCancel={() => setShowAddEvaluationDialog(false)}
+              />
+            ) : (
+              <SupplierEvaluationForm 
+                onSubmit={handleFormSubmit}
+                onCancel={() => setShowAddEvaluationDialog(false)}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

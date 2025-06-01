@@ -24,6 +24,7 @@ export interface Review {
   valueRating?: number;
   helpful: number;
   images?: string[];
+  entityName?: string; // Add entity name field
 }
 
 interface ReviewCardProps {
@@ -90,6 +91,11 @@ export function ReviewCard({ review, type, onReviewDeleted }: ReviewCardProps) {
           <div>
             <div className="font-semibold">{review.author}</div>
             <div className="text-sm text-muted-foreground">{review.date}</div>
+            {review.entityName && (
+              <div className="text-sm text-primary font-medium">
+                {type === 'event' ? 'Evento: ' : 'Fornecedor: '}{review.entityName}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -1,213 +1,247 @@
 
-import MainLayout from "@/components/MainLayout";
-import EventCard from "@/components/EventCard";
-import PricingCard from "@/components/PricingCard";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
-// Mock data for featured events
-const featuredEvents = [
-  {
-    id: "1",
-    title: "Festival Tattoo Brasil",
-    location: "São Paulo, SP",
-    date: new Date("2025-06-15"),
-    image: "https://images.unsplash.com/photo-1622298760148-0f9c81f4a101?q=80&w=2070&auto=format&fit=crop",
-    category: "Festival"
-  },
-  {
-    id: "2",
-    title: "Workshop Técnicas Avançadas",
-    location: "Rio de Janeiro, RJ",
-    date: new Date("2025-07-22"),
-    image: "https://images.unsplash.com/photo-1612371636004-04df25c9f51d?q=80&w=2070&auto=format&fit=crop",
-    category: "Workshop"
-  },
-  {
-    id: "3",
-    title: "Convenção Piercing Art",
-    location: "Belo Horizonte, MG",
-    date: new Date("2025-08-10"),
-    image: "https://images.unsplash.com/photo-1581743525371-1d03b65cebb2?q=80&w=2071&auto=format&fit=crop",
-    category: "Convenção"
-  }
-];
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import MainLayout from "@/components/MainLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Index() {
+  const { user, profile } = useAuth();
+
+  // If user is logged in, redirect to dashboard-style content
+  if (user) {
+    return (
+      <MainLayout>
+        <div className="container py-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold mb-4">
+                Bem-vindo de volta, {profile?.full_name || "Usuário"}!
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Acesse suas funcionalidades favoritas abaixo
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"></path></svg>
+                    Avaliações
+                  </CardTitle>
+                  <CardDescription>
+                    Avalie eventos e fornecedores da comunidade
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/avaliacoes">
+                    <Button className="w-full">Acessar Avaliações</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+                    Eventos
+                  </CardTitle>
+                  <CardDescription>
+                    Explore eventos de body piercing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/eventos">
+                    <Button className="w-full">Ver Eventos</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    Fornecedores
+                  </CardTitle>
+                  <CardDescription>
+                    Encontre os melhores fornecedores
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/fornecedores">
+                    <Button className="w-full">Ver Fornecedores</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+                    Minha Agenda
+                  </CardTitle>
+                  <CardDescription>
+                    Gerencie seus compromissos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/agenda">
+                    <Button className="w-full">Ver Agenda</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    Dashboard
+                  </CardTitle>
+                  <CardDescription>
+                    Visão geral das suas atividades
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/dashboard">
+                    <Button className="w-full">Acessar Dashboard</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                    Cadastrar
+                  </CardTitle>
+                  <CardDescription>
+                    Adicione eventos ou estabelecimentos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/cadastrar">
+                    <Button className="w-full">Cadastrar Conteúdo</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // If user is not logged in, show the original landing page
   return (
     <MainLayout>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-32">
-        <div className="absolute inset-0 bg-gradient-radial from-piercing-purple/20 via-background to-background -z-10" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1543297031-d102cd432d54?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay -z-20" />
-        
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center text-center space-y-4 animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter max-w-3xl">
-              Conecte-se com a comunidade de <span className="text-gradient">Body Piercing</span>
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-[600px] mb-8">
-              Descubra eventos, compartilhe avaliações e eleve sua jornada no universo do body piercing.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/eventos">
-                <Button className="button-glow bg-gradient-to-r from-piercing-purple to-piercing-blue text-white px-8 py-6 text-lg">
-                  Explorar Eventos
-                </Button>
-              </Link>
-              <Link to="/cadastro">
-                <Button variant="outline" className="border-primary/50 hover:bg-primary/10 px-8 py-6 text-lg">
-                  Criar Conta
-                </Button>
-              </Link>
+      <div className="min-h-screen">
+        {/* Hero Section */}
+        <section className="relative py-20 lg:py-32 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-piercing-purple/20 via-background to-piercing-pink/20" />
+          <div className="container relative px-4 lg:px-6">
+            <div className="flex flex-col items-center space-y-8 text-center">
+              <div className="space-y-4 max-w-3xl">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  <span className="bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
+                    PiercerGo
+                  </span>
+                </h1>
+                <p className="mx-auto max-w-[700px] text-muted-foreground text-lg sm:text-xl">
+                  A plataforma completa para profissionais e entusiastas de body piercing. 
+                  Avalie, descubra e conecte-se com a comunidade.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/auth">
+                  <Button size="lg" className="bg-gradient-to-r from-piercing-purple to-piercing-pink button-glow">
+                    Começar Agora
+                  </Button>
+                </Link>
+                <Link to="/eventos">
+                  <Button variant="outline" size="lg">
+                    Explorar Eventos
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Events */}
-      <section className="py-16 bg-background">
-        <div className="container px-4 md:px-6">
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-bold">Eventos em Destaque</h2>
-            <Link to="/eventos" className="text-primary hover:underline">
-              Ver todos
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredEvents.map(event => (
-              <EventCard key={event.id} {...event} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-muted/5">
-        <div className="container px-4 md:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl font-bold mb-4">Tudo que você precisa em um só lugar</h2>
-            <p className="text-muted-foreground">
-              Centralizamos todas as informações para que você foque no que realmente importa: a arte do body piercing.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
-              </div>
-              <h3 className="text-xl font-medium mb-2">Agenda de Eventos</h3>
-              <p className="text-muted-foreground">
-                Encontre os principais eventos do setor, workshops e convenções em todo o Brasil.
+        {/* Features Section */}
+        <section className="py-20 bg-muted/50">
+          <div className="container px-4 lg:px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Tudo que você precisa em um só lugar</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Descubra as funcionalidades que vão revolucionar sua experiência no mundo do body piercing
               </p>
             </div>
             
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path><path d="M8.5 8.5v.01"></path><path d="M16 15.5v.01"></path><path d="M12 12v.01"></path><path d="M11 17v.01"></path><path d="M7 14v.01"></path></svg>
-              </div>
-              <h3 className="text-xl font-medium mb-2">Avaliações e Reviews</h3>
-              <p className="text-muted-foreground">
-                Compartilhe suas experiências e avalie eventos e fornecedores de produtos.
-              </p>
-            </div>
-            
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path><path d="m14.5 9-5 5"></path><path d="m9.5 9 5 5"></path></svg>
-              </div>
-              <h3 className="text-xl font-medium mb-2">Logística Simplificada</h3>
-              <p className="text-muted-foreground">
-                Encontre hospedagem, transporte e informações sobre deslocamento para eventos.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-lg flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </div>
+                  <CardTitle>Avaliações Especializadas</CardTitle>
+                  <CardDescription>
+                    Sistema único de avaliação técnica, ética e diplomática para eventos e fornecedores
+                  </CardDescription>
+                </CardHeader>
+              </Card>
 
-      {/* Pricing Section */}
-      <section className="py-16">
-        <div className="container px-4 md:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl font-bold mb-4">Escolha seu plano</h2>
-            <p className="text-muted-foreground">
-              Temos opções para quem quer participar da comunidade e para profissionais que desejam divulgar seus eventos.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-4">
-            <PricingCard
-              title="Acesso Básico"
-              price={5.90}
-              period="mês"
-              description="Para entusiastas que querem ficar por dentro de todos os eventos"
-              features={[
-                "Acesso a todos os eventos",
-                "Avaliações e reviews",
-                "Notificações personalizadas",
-                "7 dias grátis no cadastro"
-              ]}
-            />
-            
-            <PricingCard
-              title="Publicador Mensal"
-              price={29.90}
-              period="mês"
-              description="Para profissionais que querem divulgar seus eventos"
-              features={[
-                "1 evento ativo por mês",
-                "Todos os benefícios do Acesso Básico",
-                "Dashboard simples de métricas",
-                "Suporte prioritário"
-              ]}
-              highlight={true}
-            />
-            
-            <PricingCard
-              title="Publicador Anual"
-              price={199.90}
-              period="ano"
-              description="Para organizadores frequentes de eventos"
-              features={[
-                "Eventos ilimitados",
-                "Destaque na agenda principal",
-                "Todos os benefícios anteriores",
-                "Relatórios avançados de performance"
-              ]}
-            />
-          </div>
-        </div>
-      </section>
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-lg flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+                  </div>
+                  <CardTitle>Eventos e Agenda</CardTitle>
+                  <CardDescription>
+                    Descubra eventos próximos e organize sua agenda profissional de forma inteligente
+                  </CardDescription>
+                </CardHeader>
+              </Card>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-muted/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-radial from-accent/10 via-background to-background -z-10" />
-        
-        <div className="container px-4 md:px-6">
-          <div className="glass-card p-8 md:p-12 rounded-3xl max-w-4xl mx-auto text-center relative z-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Pronto para se conectar com a comunidade?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Junte-se a milhares de profissionais e entusiastas de body piercing. 
-              Cadastre-se agora e ganhe 7 dias de acesso gratuito à plataforma completa.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Link to="/cadastro">
-                <Button className="button-glow bg-gradient-to-r from-piercing-purple to-piercing-blue text-white px-8 py-6 text-lg">
-                  Criar Conta Grátis
-                </Button>
-              </Link>
-              <Link to="/eventos">
-                <Button variant="outline" className="border-primary/50 hover:bg-primary/10 px-8 py-6 text-lg">
-                  Explorar Primeiro
-                </Button>
-              </Link>
+              <Card className="glass-card">
+                <CardHeader>
+                  <div className="w-12 h-12 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-lg flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  </div>
+                  <CardTitle>Rede de Fornecedores</CardTitle>
+                  <CardDescription>
+                    Conecte-se com os melhores fornecedores de joias, equipamentos e materiais
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20">
+          <div className="container px-4 lg:px-6">
+            <div className="text-center space-y-8">
+              <h2 className="text-3xl font-bold">Pronto para começar?</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Junte-se à comunidade PiercerGo e eleve seu nível profissional
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/auth">
+                  <Button size="lg" className="bg-gradient-to-r from-piercing-purple to-piercing-pink button-glow">
+                    Criar Conta Gratuita
+                  </Button>
+                </Link>
+                <Link to="/avaliacoes">
+                  <Button variant="outline" size="lg">
+                    Ver Avaliações
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </MainLayout>
   );
 }

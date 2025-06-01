@@ -70,11 +70,12 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
           technicalRating: type === 'event' ? item.environment_rating : undefined,
           ethicalRating: type === 'event' ? item.safety_rating : undefined,
           diplomaticRating: type === 'event' ? item.organization_rating : undefined,
-          organizationRating: item.organization_rating,
+          organizationRating: type === 'supplier' ? item.organization_rating : undefined,
           locationRating: undefined,
           valueRating: type === 'supplier' ? item.quality_rating : undefined,
           helpful: 0,
           images: item.images || [],
+          entityName: type === 'event' ? item.event_name : item.supplier_name, // Add entity name
         }));
 
         setReviews(formattedReviews);
