@@ -39,7 +39,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
         supplier_name
       `);
 
-      // Add filter based on type
+      // Filter correctly by type - only show reviews that belong to the specific type
       if (entityId) {
         if (type === 'event') {
           query = query.eq('event_id', entityId);
@@ -47,9 +47,11 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
           query = query.eq('supplier_id', entityId);
         }
       } else if (type === 'event') {
-        query = query.not('event_name', 'is', null);
+        // For events tab: only show reviews that have event_name and NO supplier_name
+        query = query.not('event_name', 'is', null).is('supplier_name', null);
       } else {
-        query = query.not('supplier_name', 'is', null);
+        // For suppliers tab: only show reviews that have supplier_name and NO event_name
+        query = query.not('supplier_name', 'is', null).is('event_name', null);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -75,7 +77,7 @@ export function useSupabaseReviews({ type, entityId, refreshKey = 0 }: UseSupaba
           valueRating: type === 'supplier' ? item.quality_rating : undefined,
           helpful: 0,
           images: item.images || [],
-          entityName: type === 'event' ? item.event_name : item.supplier_name, // Add entity name
+          entityName: type === 'event' ? item.event_name : item.supplier_name,
         }));
 
         setReviews(formattedReviews);

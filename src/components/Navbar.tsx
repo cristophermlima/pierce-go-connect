@@ -78,16 +78,6 @@ export default function Navbar() {
           <div className="flex items-center space-x-2 lg:space-x-4">
             {user ? (
               <div className="flex items-center space-x-2 lg:space-x-4">
-                <Link to="/cadastrar" className="hidden lg:block">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs lg:text-sm"
-                  >
-                    Cadastrar
-                  </Button>
-                </Link>
-                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -185,19 +175,21 @@ export default function Navbar() {
                       </div>
                     )}
 
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                        Ações
-                      </h4>
-                      <Link
-                        to="/cadastrar"
-                        className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <FileText className="w-4 h-4 inline mr-2" />
-                        Cadastrar Evento/Loja
-                      </Link>
-                    </div>
+                    {user && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                          Ações
+                        </h4>
+                        <Link
+                          to="/cadastrar"
+                          className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <FileText className="w-4 h-4 inline mr-2" />
+                          Cadastrar Evento/Loja
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   {/* Mobile auth section */}
