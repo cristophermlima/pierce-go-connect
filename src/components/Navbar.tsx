@@ -1,250 +1,303 @@
 
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  NavigationMenu, 
+  NavigationMenuList, 
+  NavigationMenuItem, 
+  NavigationMenuTrigger, 
+  NavigationMenuContent, 
+  NavigationMenuLink 
+} from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, Calendar, MapPin, Star, FileText, CreditCard, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Navbar() {
-  const { user, signOut } = useAuth();
-  const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
 
-  const isActive = (path: string) => location.pathname === path;
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
 
-  const navigationItems = [
-    { href: "/eventos", label: "Agenda", icon: Calendar },
-    { href: "/fornecedores", label: "Fornecedores", icon: MapPin },
-    { href: "/avaliacoes", label: "Avaliações", icon: Star },
-    { href: "/viagens", label: "Viagens", icon: FileText },
-  ];
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const userMenuItems = [
-    { href: "/dashboard", label: "Dashboard", icon: User },
-    { href: "/agenda", label: "Minha Agenda", icon: Calendar },
-    { href: "/perfil", label: "Perfil", icon: User },
-    { href: "/planos", label: "Assinatura", icon: CreditCard },
-  ];
+  const getInitials = (name?: string | null) => {
+    if (!name) return "U";
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
 
-  const NavItems = ({ mobile = false, onItemClick }: { mobile?: boolean; onItemClick?: () => void }) => (
-    <>
-      {navigationItems.map((item) => (
-        <Link
-          key={item.href}
-          to={item.href}
-          className={`${
-            isActive(item.href)
-              ? "text-primary font-medium"
-              : "text-muted-foreground hover:text-primary"
-          } transition-colors text-sm lg:text-base ${mobile ? "block py-2" : ""}`}
-          onClick={onItemClick}
-        >
-          {mobile && <item.icon className="w-4 h-4 inline mr-2" />}
-          {item.label}
-        </Link>
-      ))}
-    </>
-  );
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container px-4 lg:px-6">
-        <div className="flex h-14 lg:h-16 items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <span className="font-bold text-lg lg:text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
-              PiercerGo
-            </span>
-          </Link>
+    <header 
+      className={`sticky top-0 z-50 w-full transition-all duration-200 ${
+        isScrolled ? 'bg-background/80 backdrop-blur-md border-b' : 'bg-transparent'
+      }`}
+    >
+      <div className="container flex items-center justify-between h-16 px-4 md:px-6">
+        {/* Logo */}
+        <Link to="/" className="flex items-center font-bold text-2xl text-foreground">
+          <span className="text-gradient">PiercerGo</span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <NavItems />
-          </div>
+        {/* Desktop Navigation */}
+        <NavigationMenu className="hidden md:flex">
+          <NavigationMenuList className="gap-1">
+            <NavigationMenuItem>
+              <Link to="/eventos">
+                <NavigationMenuLink 
+                  className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                >
+                  Eventos
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/fornecedores">
+                <NavigationMenuLink 
+                  className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                >
+                  Fornecedores
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>Comunidade</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-[400px] gap-3 p-4">
+                  <li className="row-span-3">
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="block rounded-md h-full p-6 from-piercing-purple/5 to-piercing-pink/5 bg-gradient-to-br no-underline outline-none focus:shadow-md"
+                        to="/avaliacoes"
+                      >
+                        <div className="text-lg font-medium mb-2">Score Piercing</div>
+                        <p className="text-sm opacity-90">
+                          Avaliações técnicas, diplomáticas e éticas de eventos e fornecedores da área de body piercing.
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="block p-3 rounded-md hover:bg-muted"
+                        to="/agenda"
+                      >
+                        <div className="text-sm font-medium mb-1">Agenda</div>
+                        <p className="text-xs opacity-90">
+                          Organize sua agenda de eventos e compromissos.
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="block p-3 rounded-md hover:bg-muted"
+                        to="/viagens"
+                      >
+                        <div className="text-sm font-medium mb-1">Viagens</div>
+                        <p className="text-xs opacity-90">
+                          Planeje suas viagens para eventos de body piercing.
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/planos">
+                <NavigationMenuLink 
+                  className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
+                >
+                  Planos
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
 
-          {/* Right side */}
-          <div className="flex items-center space-x-2 lg:space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-2 lg:space-x-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
-                        <AvatarFallback>
-                          {user.email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-sm" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium text-sm">{user.user_metadata?.full_name || "Usuário"}</p>
-                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                      </div>
-                    </div>
+        {/* Auth Buttons or User Menu */}
+        <div className="flex items-center gap-2">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-full p-1 hover:bg-muted cursor-pointer">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{getInitials(profile?.full_name)}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden sm:inline text-sm font-medium">
+                    {profile?.full_name ? profile.full_name.split(' ')[0] : 'Usuário'}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate('/perfil')}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="3" y1="9" x2="21" y2="9"></line>
+                      <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg>
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                
+                {/* Role-specific Dashboard Links */}
+                {(profile?.is_supplier || profile?.is_event_organizer || isAdmin) && (
+                  <>
                     <DropdownMenuSeparator />
-                    {userMenuItems.map((item) => (
-                      <DropdownMenuItem key={item.href} asChild>
-                        <Link to={item.href} className="flex items-center gap-2 cursor-pointer">
-                          <item.icon className="w-4 h-4" />
-                          {item.label}
-                        </Link>
+                    <DropdownMenuLabel>Painéis de Controle</DropdownMenuLabel>
+                    
+                    {profile?.is_supplier && (
+                      <DropdownMenuItem onClick={() => navigate('/fornecedor/dashboard')}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                          <line x1="3" y1="6" x2="21" y2="6"></line>
+                          <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span>Painel do Fornecedor</span>
                       </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={signOut} className="cursor-pointer text-red-600 focus:text-red-600">
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sair
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-              <div className="hidden lg:flex items-center space-x-2">
-                <Link to="/login">
-                  <Button variant="ghost" size="sm">Entrar</Button>
-                </Link>
-                <Link to="/register">
-                  <Button size="sm" className="bg-gradient-to-r from-piercing-purple to-piercing-pink">
-                    Cadastrar
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile menu */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
+                    )}
+                    
+                    {profile?.is_event_organizer && (
+                      <DropdownMenuItem onClick={() => navigate('/organizador/dashboard')}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Painel do Organizador</span>
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        <span>Painel Administrativo</span>
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  Login
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 bg-background/95 backdrop-blur-sm">
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center space-x-2 mb-6">
-                    <div className="w-8 h-8 bg-gradient-to-r from-piercing-purple to-piercing-pink rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">P</span>
-                    </div>
-                    <span className="font-bold text-xl bg-gradient-to-r from-piercing-purple to-piercing-pink bg-clip-text text-transparent">
-                      PiercerGo
-                    </span>
-                  </div>
+              </Link>
+              <Link to="/cadastrar" className="hidden sm:block">
+                <Button size="sm" className="bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                  Cadastrar
+                </Button>
+              </Link>
+            </>
+          )}
 
-                  <div className="flex-1 space-y-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                        Navegação
-                      </h4>
-                      <div className="space-y-1">
-                        <NavItems mobile onItemClick={() => setIsOpen(false)} />
-                      </div>
-                    </div>
-
-                    {user && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                          Minha Conta
-                        </h4>
-                        <div className="space-y-1">
-                          {userMenuItems.map((item) => (
-                            <Link
-                              key={item.href}
-                              to={item.href}
-                              className="flex items-center gap-2 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                              onClick={() => setIsOpen(false)}
-                            >
-                              <item.icon className="w-4 h-4" />
-                              {item.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {user && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                          Ações
-                        </h4>
-                        <Link
-                          to="/cadastrar"
-                          className="block py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          <FileText className="w-4 h-4 inline mr-2" />
-                          Cadastrar Evento/Loja
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Mobile auth section */}
-                  <div className="border-t pt-4 mt-4">
-                    {user ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
-                            <AvatarFallback>
-                              {user.email?.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {user.user_metadata?.full_name || "Usuário"}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          className="w-full text-red-600 border-red-200 hover:bg-red-50"
-                          onClick={() => {
-                            signOut();
-                            setIsOpen(false);
-                          }}
-                        >
-                          <LogOut className="w-4 h-4 mr-2" />
-                          Sair
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Link to="/login" onClick={() => setIsOpen(false)}>
-                          <Button variant="outline" className="w-full">
-                            Entrar
-                          </Button>
-                        </Link>
-                        <Link to="/register" onClick={() => setIsOpen(false)}>
-                          <Button className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink">
-                            Cadastrar-se
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          {/* Mobile Menu Button */}
+          <button 
+            className="flex md:hidden h-8 w-8 items-center justify-center rounded-sm"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform ${isMenuOpen ? 'rotate-90' : ''}`}
+            >
+              {isMenuOpen ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="12" x2="20" y2="12"></line>
+                  <line x1="4" y1="6" x2="20" y2="6"></line>
+                  <line x1="4" y1="18" x2="20" y2="18"></line>
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </div>
-    </nav>
+      
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="container md:hidden p-4 bg-background border-t">
+          <nav className="flex flex-col space-y-2">
+            <Link to="/eventos" className="p-2 hover:bg-muted rounded-md">Eventos</Link>
+            <Link to="/fornecedores" className="p-2 hover:bg-muted rounded-md">Fornecedores</Link>
+            <Link to="/avaliacoes" className="p-2 hover:bg-muted rounded-md">Score Piercing</Link>
+            <Link to="/agenda" className="p-2 hover:bg-muted rounded-md">Agenda</Link>
+            <Link to="/viagens" className="p-2 hover:bg-muted rounded-md">Viagens</Link>
+            <Link to="/planos" className="p-2 hover:bg-muted rounded-md">Planos</Link>
+            {!user && (
+              <Link to="/cadastrar" className="p-2 hover:bg-muted rounded-md">Cadastrar</Link>
+            )}
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }

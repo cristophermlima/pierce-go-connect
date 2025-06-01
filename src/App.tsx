@@ -25,6 +25,14 @@ import ProfilePage from "@/pages/ProfilePage";
 import SuccessPage from "@/pages/SuccessPage";
 import NotFound from "@/pages/NotFound";
 
+// Admin Pages
+import AdminPage from "@/pages/AdminPage";
+import AdminUsersPage from "@/pages/AdminUsersPage";
+import AdminEventsPage from "@/pages/AdminEventsPage";
+import AdminSuppliersPage from "@/pages/AdminSuppliersPage";
+import SupplierDashboardPage from "@/pages/SupplierDashboardPage";
+import OrganizerDashboardPage from "@/pages/OrganizerDashboardPage";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -40,15 +48,25 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/eventos" element={<EventsPage />} />
             <Route path="/eventos/:id" element={<EventDetailPage />} />
-            <Route path="/eventos/adicionar" element={<AddEventPage />} />
             <Route path="/fornecedores" element={<SuppliersPage />} />
             <Route path="/avaliacoes" element={<EvaluationsPage />} />
+            <Route path="/cadastrar" element={<SubmitPage />} />
+            <Route path="/planos" element={<PlansPage />} />
+            <Route path="/sucesso" element={<SuccessPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/eventos/adicionar" element={
+              <ProtectedRoute>
+                <AddEventPage />
+              </ProtectedRoute>
+            } />
             <Route path="/agenda" element={
               <ProtectedRoute>
                 <SchedulePage />
@@ -64,8 +82,6 @@ function App() {
                 <TravelPage />
               </ProtectedRoute>
             } />
-            <Route path="/cadastrar" element={<SubmitPage />} />
-            <Route path="/planos" element={<PlansPage />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <DashboardPage />
@@ -76,7 +92,42 @@ function App() {
                 <ProfilePage />
               </ProtectedRoute>
             } />
-            <Route path="/sucesso" element={<SuccessPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/usuarios" element={
+              <ProtectedRoute>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/eventos" element={
+              <ProtectedRoute>
+                <AdminEventsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/fornecedores" element={
+              <ProtectedRoute>
+                <AdminSuppliersPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Role-specific Dashboards */}
+            <Route path="/fornecedor/dashboard" element={
+              <ProtectedRoute>
+                <SupplierDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/organizador/dashboard" element={
+              <ProtectedRoute>
+                <OrganizerDashboardPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
