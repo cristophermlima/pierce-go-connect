@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -91,7 +90,7 @@ export default function Navbar() {
             <NavigationMenuItem>
               <NavigationMenuTrigger>Comunidade</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-3 p-4">
+                <ul className="grid w-[500px] gap-3 p-6 md:grid-cols-2">
                   <li className="row-span-3">
                     <NavigationMenuLink asChild>
                       <Link
@@ -101,6 +100,32 @@ export default function Navbar() {
                         <div className="text-lg font-medium mb-2">Score Piercing</div>
                         <p className="text-sm opacity-90">
                           Avaliações técnicas, diplomáticas e éticas de eventos e fornecedores da área de body piercing.
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="block p-3 rounded-md hover:bg-muted"
+                        to="/piercers"
+                      >
+                        <div className="text-sm font-medium mb-1">Catálogo de Piercers</div>
+                        <p className="text-xs opacity-90">
+                          Encontre piercers qualificados na sua cidade.
+                        </p>
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        className="block p-3 rounded-md hover:bg-muted"
+                        to="/aprender"
+                      >
+                        <div className="text-sm font-medium mb-1">Centro de Aprendizado</div>
+                        <p className="text-xs opacity-90">
+                          Ebooks, cursos e materiais educacionais.
                         </p>
                       </Link>
                     </NavigationMenuLink>
@@ -190,7 +215,7 @@ export default function Navbar() {
                     {profile?.is_supplier && (
                       <DropdownMenuItem onClick={() => navigate('/fornecedor/dashboard')}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                          <path d="M6 2L3 6v14a2 2 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                           <line x1="3" y1="6" x2="21" y2="6"></line>
                           <path d="M16 10a4 4 0 0 1-8 0"></path>
                         </svg>
@@ -288,6 +313,8 @@ export default function Navbar() {
           <nav className="flex flex-col space-y-2">
             <Link to="/eventos" className="p-2 hover:bg-muted rounded-md">Eventos</Link>
             <Link to="/fornecedores" className="p-2 hover:bg-muted rounded-md">Fornecedores</Link>
+            <Link to="/piercers" className="p-2 hover:bg-muted rounded-md">Catálogo de Piercers</Link>
+            <Link to="/aprender" className="p-2 hover:bg-muted rounded-md">Centro de Aprendizado</Link>
             <Link to="/avaliacoes" className="p-2 hover:bg-muted rounded-md">Score Piercing</Link>
             <Link to="/agenda" className="p-2 hover:bg-muted rounded-md">Agenda</Link>
             <Link to="/viagens" className="p-2 hover:bg-muted rounded-md">Viagens</Link>
