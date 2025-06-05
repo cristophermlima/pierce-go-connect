@@ -39,6 +39,164 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_resources: {
+        Row: {
+          active: boolean | null
+          affiliate_link: string
+          author: string | null
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          duration: string | null
+          featured: boolean | null
+          id: string
+          pages: number | null
+          price: number | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          affiliate_link: string
+          author?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          pages?: number | null
+          price?: number | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          affiliate_link?: string
+          author?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          pages?: number | null
+          price?: number | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      piercer_reviews: {
+        Row: {
+          anonymous: boolean | null
+          comment: string | null
+          created_at: string
+          id: string
+          piercer_id: string | null
+          rating: number
+          reviewer_id: string | null
+        }
+        Insert: {
+          anonymous?: boolean | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          piercer_id?: string | null
+          rating: number
+          reviewer_id?: string | null
+        }
+        Update: {
+          anonymous?: boolean | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          piercer_id?: string | null
+          rating?: number
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "piercer_reviews_piercer_id_fkey"
+            columns: ["piercer_id"]
+            isOneToOne: false
+            referencedRelation: "piercers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      piercers: {
+        Row: {
+          bio: string | null
+          city: string
+          country: string
+          created_at: string
+          experience_years: number | null
+          featured: boolean | null
+          id: string
+          instagram: string | null
+          name: string
+          phone: string | null
+          portfolio_images: string[] | null
+          rating: number | null
+          specialties: string[] | null
+          state: string
+          total_reviews: number | null
+          updated_at: string
+          user_id: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          city: string
+          country?: string
+          created_at?: string
+          experience_years?: number | null
+          featured?: boolean | null
+          id?: string
+          instagram?: string | null
+          name: string
+          phone?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          specialties?: string[] | null
+          state: string
+          total_reviews?: number | null
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          experience_years?: number | null
+          featured?: boolean | null
+          id?: string
+          instagram?: string | null
+          name?: string
+          phone?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          specialties?: string[] | null
+          state?: string
+          total_reviews?: number | null
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -48,6 +206,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           is_event_organizer: boolean | null
+          is_piercer: boolean | null
           is_supplier: boolean | null
         }
         Insert: {
@@ -58,6 +217,7 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           is_event_organizer?: boolean | null
+          is_piercer?: boolean | null
           is_supplier?: boolean | null
         }
         Update: {
@@ -68,6 +228,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           is_event_organizer?: boolean | null
+          is_piercer?: boolean | null
           is_supplier?: boolean | null
         }
         Relationships: []
@@ -171,6 +332,42 @@ export type Database = {
           start_date?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          subscription_tier: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          subscription_tier?: string | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

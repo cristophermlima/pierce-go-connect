@@ -1,210 +1,140 @@
+
 import { useState } from "react";
-import MainLayout from "@/components/MainLayout";
-import PricingCard from "@/components/PricingCard";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Store, User } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import MainLayout from "@/components/MainLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
+import { Check, Crown, Star } from "lucide-react";
+
+const plans = [
+  {
+    id: "event_organizer",
+    name: "Organizador de Eventos",
+    price: "R$ 29,90",
+    period: "/mês",
+    description: "Para profissionais que organizam eventos de body piercing",
+    features: [
+      "Criar eventos ilimitados",
+      "Dashboard avançado de analytics",
+      "Gestão de participantes",
+      "Relatórios detalhados",
+      "Suporte prioritário",
+      "Badge de verificação"
+    ],
+    popular: true,
+    color: "from-purple-500 to-pink-500"
+  },
+  {
+    id: "supplier",
+    name: "Fornecedor Premium",
+    price: "R$ 39,90",
+    period: "/mês",
+    description: "Para fornecedores de joias, equipamentos e materiais",
+    features: [
+      "Catálogo de produtos ilimitado",
+      "Destaque nas buscas",
+      "Analytics de vendas",
+      "Sistema de avaliações premium",
+      "Integração com WhatsApp",
+      "Badge de fornecedor verificado"
+    ],
+    popular: false,
+    color: "from-blue-500 to-cyan-500"
+  }
+];
 
 export default function PlansPage() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const { user } = useAuth();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const userPlans = [
-    {
-      title: "Gratuito",
-      price: 0,
-      period: "sempre",
-      description: "Para usuários que querem explorar a plataforma",
-      features: [
-        "Visualizar eventos",
-        "Avaliar eventos e fornecedores",
-        "Acesso limitado a conteúdo"
-      ]
-    },
-    {
-      title: "Agenda Pessoal",
-      price: billingCycle === "monthly" ? 5.9 : 59,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Ideal para organizar sua agenda pessoal",
-      features: [
-        "Tudo do plano gratuito",
-        "Agenda pessoal completa",
-        "Lembretes e notificações",
-        "Sincronização de eventos"
-      ]
-    },
-    {
-      title: "Profissional",
-      price: billingCycle === "monthly" ? 29 : 290,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Para profissionais do piercing",
-      features: [
-        "Tudo do plano Agenda Pessoal",
-        "Agenda avançada",
-        "Planejamento de viagens",
-        "Avaliações detalhadas",
-        "Suporte prioritário"
-      ],
-      highlight: true
-    },
-    {
-      title: "Premium",
-      price: billingCycle === "monthly" ? 49 : 490,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Para profissionais avançados",
-      features: [
-        "Tudo do plano profissional",
-        "Recursos exclusivos",
-        "Análises detalhadas",
-        "Acesso antecipado a novidades",
-        "Consultoria personalizada"
-      ]
+  const handleSubscribe = async (planType: string) => {
+    if (!user) {
+      toast.error("Você precisa estar logado para assinar um plano");
+      return;
     }
-  ];
 
-  const supplierPlans = [
-    {
-      title: "Básico",
-      price: billingCycle === "monthly" ? 49 : 490,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Para pequenas lojas e fornecedores iniciantes",
-      features: [
-        "Perfil de loja básico",
-        "Até 10 produtos anunciados",
-        "Avaliações de clientes",
-        "Contato direto com clientes",
-        "Estatísticas básicas"
-      ]
-    },
-    {
-      title: "Profissional",
-      price: billingCycle === "monthly" ? 99 : 990,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Para fornecedores estabelecidos",
-      features: [
-        "Tudo do plano básico",
-        "Produtos ilimitados",
-        "Destaque na busca",
-        "Múltiplas imagens por produto",
-        "Promoções e descontos",
-        "Relatórios detalhados"
-      ],
-      highlight: true
-    },
-    {
-      title: "Enterprise",
-      price: billingCycle === "monthly" ? 199 : 1990,
-      period: billingCycle === "monthly" ? "mês" : "ano",
-      description: "Para grandes fornecedores e distribuidores",
-      features: [
-        "Tudo do plano profissional",
-        "API de integração",
-        "Gerenciamento de múltiplas lojas",
-        "Suporte dedicado",
-        "Treinamento personalizado",
-        "Análises avançadas de mercado"
-      ]
+    setLoading(planType);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-subscription-checkout", {
+        body: { planType }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error: any) {
+      console.error("Error creating checkout:", error);
+      toast.error("Erro ao processar assinatura. Tente novamente.");
+    } finally {
+      setLoading(null);
     }
-  ];
+  };
 
   return (
     <MainLayout>
       <div className="container py-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-4">Escolha seu plano</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Planos flexíveis para profissionais do piercing e fornecedores
-            </p>
-          </div>
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold mb-4">
+            Escolha seu <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Plano</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Desbloqueie todo o potencial da plataforma com nossos planos premium
+          </p>
+        </div>
 
-          <Tabs defaultValue="users" className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="users" className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Profissionais
-                </TabsTrigger>
-                <TabsTrigger value="suppliers" className="flex items-center gap-2">
-                  <Store className="w-4 h-4" />
-                  Fornecedores
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center gap-4 p-1 bg-muted rounded-lg">
-                <Button
-                  variant={billingCycle === "monthly" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBillingCycle("monthly")}
-                  className="rounded-md"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {plans.map((plan) => (
+            <Card key={plan.id} className={`relative ${plan.popular ? 'ring-2 ring-purple-500' : ''}`}>
+              {plan.popular && (
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500">
+                  <Star className="w-3 h-3 mr-1" />
+                  Mais Popular
+                </Badge>
+              )}
+              
+              <CardHeader>
+                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${plan.color} flex items-center justify-center mb-4`}>
+                  <Crown className="w-6 h-6 text-white" />
+                </div>
+                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <CardDescription>{plan.description}</CardDescription>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold">{plan.price}</span>
+                  <span className="text-muted-foreground">{plan.period}</span>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <ul className="space-y-3 mb-6">
+                  {plan.features.map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-green-500" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <Button 
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={loading === plan.id}
+                  className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90`}
                 >
-                  Mensal
+                  {loading === plan.id ? "Processando..." : "Assinar Agora"}
                 </Button>
-                <Button
-                  variant={billingCycle === "yearly" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setBillingCycle("yearly")}
-                  className="rounded-md"
-                >
-                  Anual
-                  <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                    2 meses grátis
-                  </span>
-                </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-            <TabsContent value="users">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                {userPlans.map((plan, index) => (
-                  <PricingCard key={index} {...plan} />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="suppliers">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {supplierPlans.map((plan, index) => (
-                  <PricingCard key={index} {...plan} />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-16 text-center">
-            <h2 className="text-2xl font-bold mb-4">Perguntas Frequentes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto text-left">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Posso cancelar a qualquer momento?</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Sim, você pode cancelar sua assinatura a qualquer momento sem taxas adicionais.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Os preços incluem impostos?</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Os preços são apresentados sem impostos. Impostos aplicáveis serão adicionados no checkout.
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Existe desconto para planos anuais?</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Sim, planos anuais têm desconto equivalente a 2 meses gratuitos.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Como funciona o suporte?</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Oferecemos suporte via email para todos os planos, com suporte prioritário para planos pagos.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="text-center mt-10">
+          <p className="text-sm text-muted-foreground">
+            Pagamento seguro processado pelo Stripe • Cancele a qualquer momento
+          </p>
         </div>
       </div>
     </MainLayout>

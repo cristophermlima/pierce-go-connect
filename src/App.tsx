@@ -1,8 +1,8 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SubscriptionProvider } from "@/hooks/useSubscription";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
@@ -21,6 +21,8 @@ import AddScheduleEventPage from "@/pages/AddScheduleEventPage";
 import TravelPage from "@/pages/TravelPage";
 import SubmitPage from "@/pages/SubmitPage";
 import PlansPage from "@/pages/PlansPage";
+import PiercersPage from "@/pages/PiercersPage";
+import LearningPage from "@/pages/LearningPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SuccessPage from "@/pages/SuccessPage";
 import NotFound from "@/pages/NotFound";
@@ -45,94 +47,98 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/eventos" element={<EventsPage />} />
-            <Route path="/eventos/:id" element={<EventDetailPage />} />
-            <Route path="/fornecedores" element={<SuppliersPage />} />
-            <Route path="/avaliacoes" element={<EvaluationsPage />} />
-            <Route path="/cadastrar" element={<SubmitPage />} />
-            <Route path="/planos" element={<PlansPage />} />
-            <Route path="/sucesso" element={<SuccessPage />} />
-            
-            {/* Protected Routes */}
-            <Route path="/eventos/adicionar" element={
-              <ProtectedRoute>
-                <AddEventPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/agenda" element={
-              <ProtectedRoute>
-                <SchedulePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/agenda/adicionar" element={
-              <ProtectedRoute>
-                <AddScheduleEventPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/viagens" element={
-              <ProtectedRoute>
-                <TravelPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/perfil" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <AdminPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/usuarios" element={
-              <ProtectedRoute>
-                <AdminUsersPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/eventos" element={
-              <ProtectedRoute>
-                <AdminEventsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/fornecedores" element={
-              <ProtectedRoute>
-                <AdminSuppliersPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Role-specific Dashboards */}
-            <Route path="/fornecedor/dashboard" element={
-              <ProtectedRoute>
-                <SupplierDashboardPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/organizador/dashboard" element={
-              <ProtectedRoute>
-                <OrganizerDashboardPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </AuthProvider>
-      </Router>
+      <AuthProvider>
+        <SubscriptionProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/eventos" element={<EventsPage />} />
+              <Route path="/eventos/:id" element={<EventDetailPage />} />
+              <Route path="/fornecedores" element={<SuppliersPage />} />
+              <Route path="/avaliacoes" element={<EvaluationsPage />} />
+              <Route path="/cadastrar" element={<SubmitPage />} />
+              <Route path="/planos" element={<PlansPage />} />
+              <Route path="/piercers" element={<PiercersPage />} />
+              <Route path="/aprender" element={<LearningPage />} />
+              <Route path="/sucesso" element={<SuccessPage />} />
+              
+              {/* Protected Routes */}
+              <Route path="/eventos/adicionar" element={
+                <ProtectedRoute>
+                  <AddEventPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/agenda" element={
+                <ProtectedRoute>
+                  <SchedulePage />
+                </ProtectedRoute>
+              } />
+              <Route path="/agenda/adicionar" element={
+                <ProtectedRoute>
+                  <AddScheduleEventPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/viagens" element={
+                <ProtectedRoute>
+                  <TravelPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/perfil" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/usuarios" element={
+                <ProtectedRoute>
+                  <AdminUsersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/eventos" element={
+                <ProtectedRoute>
+                  <AdminEventsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/fornecedores" element={
+                <ProtectedRoute>
+                  <AdminSuppliersPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Role-specific Dashboards */}
+              <Route path="/fornecedor/dashboard" element={
+                <ProtectedRoute>
+                  <SupplierDashboardPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/organizador/dashboard" element={
+                <ProtectedRoute>
+                  <OrganizerDashboardPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </Router>
+        </SubscriptionProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
