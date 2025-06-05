@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -47,9 +48,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <Router>
+      <Router>
+        <AuthProvider>
+          <SubscriptionProvider>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
@@ -136,9 +137,9 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
-          </Router>
-        </SubscriptionProvider>
-      </AuthProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }

@@ -1,36 +1,40 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MainLayout from "@/components/MainLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, BookOpen, PlayCircle, Clock, FileText, Star, ExternalLink } from "lucide-react";
+import { Book, Play, Search, Star, ExternalLink } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
-interface LearningResource {
+type LearningResource = {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   type: "ebook" | "course";
-  category: string;
-  price: number;
+  category: string | null;
+  price: number | null;
   affiliate_link: string;
-  cover_image: string;
-  author: string;
-  duration?: string;
-  pages?: number;
+  cover_image: string | null;
+  author: string | null;
+  duration: string | null;
+  pages: number | null;
   featured: boolean;
-}
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 export default function LearningPage() {
   const [resources, setResources] = useState<LearningResource[]>([]);
   const [filteredResources, setFilteredResources] = useState<LearningResource[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchResources();
@@ -38,22 +42,28 @@ export default function LearningPage() {
 
   useEffect(() => {
     filterResources();
-  }, [searchQuery, activeTab, resources]);
+  }, [resources, searchTerm, typeFilter, categoryFilter]);
 
   const fetchResources = async () => {
     try {
       const { data, error } = await supabase
-        .from("learning_resources")
-        .select("*")
-        .eq("active", true)
-        .order("featured", { ascending: false })
-        .order("created_at", { ascending: false });
+        .from('learning_resources')
+        .select('*')
+        .eq('active', true)
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setResources(data || []);
+
+      const typedData = (data || []).map(item => ({
+        ...item,
+        type: item.type as "ebook" | "course"
+      }));
+
+      setResources(typedData);
     } catch (error) {
-      console.error("Error fetching learning resources:", error);
-      toast.error("Erro ao carregar recursos");
+      console.error('Error fetching learning resources:', error);
+      toast.error("Erro ao carregar recursos de aprendizado");
     } finally {
       setLoading(false);
     }
@@ -62,41 +72,32 @@ export default function LearningPage() {
   const filterResources = () => {
     let filtered = resources;
 
-    if (activeTab !== "all") {
-      filtered = filtered.filter(resource => resource.type === activeTab);
+    if (searchTerm) {
+      filtered = filtered.filter(resource =>
+        resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        resource.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        resource.author?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
-    if (searchQuery) {
-      filtered = filtered.filter(resource =>
-        resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resource.author?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        resource.category?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    if (typeFilter !== "all") {
+      filtered = filtered.filter(resource => resource.type === typeFilter);
+    }
+
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(resource => resource.category === categoryFilter);
     }
 
     setFilteredResources(filtered);
   };
 
-  const handleAffiliateClick = (link: string, title: string) => {
-    // Analytics tracking could be added here
-    console.log(`Affiliate click: ${title}`);
-    window.open(link, '_blank');
-  };
+  const categories = [...new Set(resources.map(r => r.category).filter(Boolean))];
 
   if (loading) {
     return (
       <MainLayout>
         <div className="container py-10">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-96 mx-auto mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-80 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
+          <div className="text-center">Carregando recursos...</div>
         </div>
       </MainLayout>
     );
@@ -105,131 +106,201 @@ export default function LearningPage() {
   return (
     <MainLayout>
       <div className="container py-10">
-        <div className="text-center mb-10">
+        <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">
-            Aprenda <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Body Piercing</span>
+            Centro de <span className="text-gradient">Aprendizado</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ebooks e cursos especializados para elevar seu conhecimento e técnicas em body piercing
+          <p className="text-xl text-muted-foreground">
+            Ebooks, cursos e materiais educacionais para aprimorar suas técnicas de body piercing
           </p>
         </div>
 
-        {/* Busca */}
-        <div className="relative mb-8 max-w-md mx-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Buscar ebooks e cursos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        {/* Filters */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar recursos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              <SelectItem value="ebook">E-books</SelectItem>
+              <SelectItem value="course">Cursos</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {categories.map(category => (
+                <SelectItem key={category} value={category!}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button variant="outline" onClick={() => {
+            setSearchTerm("");
+            setTypeFilter("all");
+            setCategoryFilter("all");
+          }}>
+            Limpar filtros
+          </Button>
         </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
-            <TabsTrigger value="all">Todos</TabsTrigger>
-            <TabsTrigger value="ebook">Ebooks</TabsTrigger>
-            <TabsTrigger value="course">Cursos</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {/* Grid de Recursos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResources.map((resource) => (
-            <Card key={resource.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative">
-                {resource.cover_image && (
-                  <img
-                    src={resource.cover_image}
-                    alt={resource.title}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                {resource.featured && (
-                  <Badge className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+        {/* Featured Resources */}
+        {filteredResources.some(r => r.featured) && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Recursos em Destaque</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredResources.filter(resource => resource.featured).map((resource) => (
+                <Card key={resource.id} className="relative overflow-hidden">
+                  <Badge className="absolute top-4 right-4 bg-yellow-500">
                     <Star className="w-3 h-3 mr-1" />
                     Destaque
                   </Badge>
-                )}
-                <div className="absolute top-2 right-2">
-                  <Badge variant={resource.type === "ebook" ? "default" : "secondary"}>
-                    {resource.type === "ebook" ? (
-                      <BookOpen className="w-3 h-3 mr-1" />
-                    ) : (
-                      <PlayCircle className="w-3 h-3 mr-1" />
-                    )}
-                    {resource.type === "ebook" ? "Ebook" : "Curso"}
-                  </Badge>
-                </div>
-              </div>
-              
-              <CardHeader>
-                <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
-                {resource.author && (
-                  <CardDescription>por {resource.author}</CardDescription>
-                )}
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {resource.description}
-                  </p>
                   
-                  <div className="flex items-center gap-4 text-sm">
-                    {resource.type === "ebook" && resource.pages && (
-                      <div className="flex items-center gap-1">
-                        <FileText className="w-4 h-4" />
-                        {resource.pages} páginas
-                      </div>
-                    )}
-                    {resource.type === "course" && resource.duration && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {resource.duration}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {resource.category && (
-                    <Badge variant="outline">{resource.category}</Badge>
+                  {resource.cover_image && (
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={resource.cover_image} 
+                        alt={resource.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   )}
                   
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="text-2xl font-bold text-green-600">
-                      R$ {resource.price?.toFixed(2).replace(".", ",")}
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-2">
+                      {resource.type === 'ebook' ? (
+                        <Book className="w-4 h-4 text-blue-500" />
+                      ) : (
+                        <Play className="w-4 h-4 text-green-500" />
+                      )}
+                      <Badge variant="outline">{resource.type === 'ebook' ? 'E-book' : 'Curso'}</Badge>
+                      {resource.category && <Badge variant="secondary">{resource.category}</Badge>}
                     </div>
+                    <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
+                    {resource.author && (
+                      <CardDescription>por {resource.author}</CardDescription>
+                    )}
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {resource.description && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                        {resource.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      {resource.type === 'ebook' && resource.pages && (
+                        <span className="text-sm text-muted-foreground">{resource.pages} páginas</span>
+                      )}
+                      {resource.type === 'course' && resource.duration && (
+                        <span className="text-sm text-muted-foreground">{resource.duration}</span>
+                      )}
+                      {resource.price && (
+                        <span className="font-bold text-lg">R$ {resource.price.toFixed(2)}</span>
+                      )}
+                    </div>
+                    
                     <Button 
-                      onClick={() => handleAffiliateClick(resource.affiliate_link, resource.title)}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
+                      className="w-full"
+                      onClick={() => window.open(resource.affiliate_link, '_blank')}
                     >
-                      Comprar
+                      Acessar Conteúdo
                       <ExternalLink className="w-4 h-4 ml-2" />
                     </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredResources.length === 0 && !loading && (
-          <div className="text-center py-10">
-            <p className="text-lg text-muted-foreground">
-              Nenhum recurso encontrado com os filtros selecionados
-            </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Seção de Informação sobre Afiliados */}
-        <div className="mt-16 p-6 bg-muted/50 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Sobre nossos links de afiliados</h3>
-          <p className="text-sm text-muted-foreground">
-            Este site pode conter links de afiliados. Quando você compra através desses links, 
-            podemos receber uma comissão sem custo adicional para você. Isso nos ajuda a manter 
-            a plataforma gratuita e sempre atualizada com os melhores conteúdos.
-          </p>
+        {/* All Resources */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">
+            Todos os Recursos ({filteredResources.length})
+          </h2>
+          
+          {filteredResources.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum recurso encontrado com os filtros aplicados.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredResources.filter(resource => !resource.featured).map((resource) => (
+                <Card key={resource.id} className="overflow-hidden">
+                  {resource.cover_image && (
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={resource.cover_image} 
+                        alt={resource.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  <CardHeader>
+                    <div className="flex items-center gap-2 mb-2">
+                      {resource.type === 'ebook' ? (
+                        <Book className="w-4 h-4 text-blue-500" />
+                      ) : (
+                        <Play className="w-4 h-4 text-green-500" />
+                      )}
+                      <Badge variant="outline">{resource.type === 'ebook' ? 'E-book' : 'Curso'}</Badge>
+                      {resource.category && <Badge variant="secondary">{resource.category}</Badge>}
+                    </div>
+                    <CardTitle className="line-clamp-2">{resource.title}</CardTitle>
+                    {resource.author && (
+                      <CardDescription>por {resource.author}</CardDescription>
+                    )}
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {resource.description && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                        {resource.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      {resource.type === 'ebook' && resource.pages && (
+                        <span className="text-sm text-muted-foreground">{resource.pages} páginas</span>
+                      )}
+                      {resource.type === 'course' && resource.duration && (
+                        <span className="text-sm text-muted-foreground">{resource.duration}</span>
+                      )}
+                      {resource.price && (
+                        <span className="font-bold text-lg">R$ {resource.price.toFixed(2)}</span>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      className="w-full"
+                      onClick={() => window.open(resource.affiliate_link, '_blank')}
+                    >
+                      Acessar Conteúdo
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </MainLayout>

@@ -1,41 +1,46 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import MainLayout from "@/components/MainLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, MapPin, Star, Instagram, Globe, Phone, Award } from "lucide-react";
+import { MapPin, Star, Phone, Instagram, Globe, Search, Verified } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
-interface Piercer {
+type Piercer = {
   id: string;
+  user_id: string | null;
   name: string;
-  bio: string;
-  experience_years: number;
-  specialties: string[];
+  bio: string | null;
+  experience_years: number | null;
+  specialties: string[] | null;
   city: string;
   state: string;
   country: string;
-  phone?: string;
-  instagram?: string;
-  website?: string;
-  portfolio_images: string[];
+  phone: string | null;
+  instagram: string | null;
+  website: string | null;
+  portfolio_images: string[] | null;
   rating: number;
   total_reviews: number;
   verified: boolean;
   featured: boolean;
-}
+  created_at: string;
+  updated_at: string;
+};
 
 export default function PiercersPage() {
   const [piercers, setPiercers] = useState<Piercer[]>([]);
   const [filteredPiercers, setFilteredPiercers] = useState<Piercer[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cityFilter, setCityFilter] = useState<string>("all");
+  const [stateFilter, setStateFilter] = useState<string>("all");
+  const [specialtyFilter, setSpecialtyFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchPiercers();
@@ -43,20 +48,21 @@ export default function PiercersPage() {
 
   useEffect(() => {
     filterPiercers();
-  }, [searchQuery, selectedCity, piercers]);
+  }, [piercers, searchTerm, cityFilter, stateFilter, specialtyFilter]);
 
   const fetchPiercers = async () => {
     try {
       const { data, error } = await supabase
-        .from("piercers")
-        .select("*")
-        .order("featured", { ascending: false })
-        .order("rating", { ascending: false });
+        .from('piercers')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('rating', { ascending: false });
 
       if (error) throw error;
+
       setPiercers(data || []);
     } catch (error) {
-      console.error("Error fetching piercers:", error);
+      console.error('Error fetching piercers:', error);
       toast.error("Erro ao carregar piercers");
     } finally {
       setLoading(false);
@@ -66,20 +72,27 @@ export default function PiercersPage() {
   const filterPiercers = () => {
     let filtered = piercers;
 
-    if (searchQuery) {
+    if (searchTerm) {
       filtered = filtered.filter(piercer =>
-        piercer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        piercer.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        piercer.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        piercer.specialties.some(specialty => 
-          specialty.toLowerCase().includes(searchQuery.toLowerCase())
+        piercer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        piercer.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        piercer.specialties?.some(specialty => 
+          specialty.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
 
-    if (selectedCity) {
+    if (cityFilter !== "all") {
+      filtered = filtered.filter(piercer => piercer.city === cityFilter);
+    }
+
+    if (stateFilter !== "all") {
+      filtered = filtered.filter(piercer => piercer.state === stateFilter);
+    }
+
+    if (specialtyFilter !== "all") {
       filtered = filtered.filter(piercer => 
-        piercer.city.toLowerCase().includes(selectedCity.toLowerCase())
+        piercer.specialties?.includes(specialtyFilter)
       );
     }
 
@@ -87,20 +100,23 @@ export default function PiercersPage() {
   };
 
   const cities = [...new Set(piercers.map(p => p.city))].sort();
+  const states = [...new Set(piercers.map(p => p.state))].sort();
+  const allSpecialties = [...new Set(piercers.flatMap(p => p.specialties || []))].sort();
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+      />
+    ));
+  };
 
   if (loading) {
     return (
       <MainLayout>
         <div className="container py-10">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-96 mx-auto mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
+          <div className="text-center">Carregando piercers...</div>
         </div>
       </MainLayout>
     );
@@ -109,145 +125,272 @@ export default function PiercersPage() {
   return (
     <MainLayout>
       <div className="container py-10">
-        <div className="text-center mb-10">
+        <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">
-            Catálogo de <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Piercers</span>
+            Catálogo de <span className="text-gradient">Piercers</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Encontre os melhores profissionais de body piercing da sua região ou descubra talentos pelo Brasil
+          <p className="text-xl text-muted-foreground">
+            Encontre piercers qualificados na sua cidade ou descubra profissionais em outras regiões
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        {/* Filters */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, cidade ou especialidade..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar piercers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
-          <select
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            className="px-3 py-2 border rounded-md bg-background"
-          >
-            <option value="">Todas as cidades</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
+          
+          <Select value={stateFilter} onValueChange={setStateFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os estados</SelectItem>
+              {states.map(state => (
+                <SelectItem key={state} value={state}>{state}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Cidade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as cidades</SelectItem>
+              {cities.map(city => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Especialidade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as especialidades</SelectItem>
+              {allSpecialties.map(specialty => (
+                <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button variant="outline" onClick={() => {
+            setSearchTerm("");
+            setCityFilter("all");
+            setStateFilter("all");
+            setSpecialtyFilter("all");
+          }}>
+            Limpar filtros
+          </Button>
         </div>
 
-        {/* Grid de Piercers */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPiercers.map((piercer) => (
-            <Card key={piercer.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
+        {/* Featured Piercers */}
+        {filteredPiercers.some(p => p.featured) && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">Piercers em Destaque</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPiercers.filter(piercer => piercer.featured).map((piercer) => (
+                <Card key={piercer.id} className="relative overflow-hidden">
+                  <Badge className="absolute top-4 right-4 bg-yellow-500">
+                    <Star className="w-3 h-3 mr-1" />
+                    Destaque
+                  </Badge>
+                  
+                  <CardHeader className="text-center">
+                    <Avatar className="w-20 h-20 mx-auto mb-4">
                       <AvatarImage src={piercer.portfolio_images?.[0]} />
                       <AvatarFallback>{piercer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {piercer.name}
-                        {piercer.verified && (
-                          <Award className="w-4 h-4 text-blue-500" title="Verificado" />
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="w-3 h-3" />
-                        {piercer.city}, {piercer.state}
-                      </div>
-                    </div>
-                  </div>
-                  {piercer.featured && (
-                    <Badge variant="secondary" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                      Destaque
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-3">
-                  {piercer.rating > 0 && (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{piercer.rating.toFixed(1)}</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        ({piercer.total_reviews} avaliações)
-                      </span>
-                    </div>
-                  )}
-                  
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {piercer.bio || "Profissional especializado em body piercing"}
-                  </p>
-                  
-                  {piercer.experience_years && (
-                    <p className="text-sm">
-                      <span className="font-medium">{piercer.experience_years} anos</span> de experiência
-                    </p>
-                  )}
-                  
-                  {piercer.specialties?.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {piercer.specialties.slice(0, 3).map((specialty, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {specialty}
-                        </Badge>
-                      ))}
-                      {piercer.specialties.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{piercer.specialties.length - 3}
-                        </Badge>
+                    
+                    <div className="flex items-center justify-center gap-2">
+                      <CardTitle>{piercer.name}</CardTitle>
+                      {piercer.verified && (
+                        <Verified className="w-5 h-5 text-blue-500" />
                       )}
                     </div>
-                  )}
+                    
+                    <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      {piercer.city}, {piercer.state}
+                    </div>
+                    
+                    {piercer.rating > 0 && (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="flex">{renderStars(piercer.rating)}</div>
+                        <span className="text-sm text-muted-foreground">
+                          ({piercer.total_reviews} avaliações)
+                        </span>
+                      </div>
+                    )}
+                  </CardHeader>
                   
-                  <div className="flex items-center gap-2 pt-2">
-                    {piercer.instagram && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={`https://instagram.com/${piercer.instagram}`} target="_blank" rel="noopener noreferrer">
-                          <Instagram className="w-3 h-3" />
-                        </a>
-                      </Button>
+                  <CardContent>
+                    {piercer.experience_years && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {piercer.experience_years} anos de experiência
+                      </p>
                     )}
-                    {piercer.website && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={piercer.website} target="_blank" rel="noopener noreferrer">
-                          <Globe className="w-3 h-3" />
-                        </a>
-                      </Button>
+                    
+                    {piercer.specialties && piercer.specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {piercer.specialties.slice(0, 3).map((specialty, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {specialty}
+                          </Badge>
+                        ))}
+                        {piercer.specialties.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{piercer.specialties.length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     )}
-                    {piercer.phone && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={`https://wa.me/${piercer.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
-                          <Phone className="w-3 h-3" />
-                        </a>
-                      </Button>
+                    
+                    {piercer.bio && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                        {piercer.bio}
+                      </p>
                     )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredPiercers.length === 0 && !loading && (
-          <div className="text-center py-10">
-            <p className="text-lg text-muted-foreground">
-              Nenhum piercer encontrado com os filtros selecionados
-            </p>
+                    
+                    <div className="flex gap-2">
+                      {piercer.phone && (
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {piercer.instagram && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => window.open(`https://instagram.com/${piercer.instagram}`, '_blank')}
+                        >
+                          <Instagram className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {piercer.website && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => window.open(piercer.website!, '_blank')}
+                        >
+                          <Globe className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* All Piercers */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">
+            Todos os Piercers ({filteredPiercers.length})
+          </h2>
+          
+          {filteredPiercers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum piercer encontrado com os filtros aplicados.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPiercers.filter(piercer => !piercer.featured).map((piercer) => (
+                <Card key={piercer.id}>
+                  <CardHeader className="text-center">
+                    <Avatar className="w-16 h-16 mx-auto mb-4">
+                      <AvatarImage src={piercer.portfolio_images?.[0]} />
+                      <AvatarFallback>{piercer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex items-center justify-center gap-2">
+                      <CardTitle className="text-lg">{piercer.name}</CardTitle>
+                      {piercer.verified && (
+                        <Verified className="w-4 h-4 text-blue-500" />
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      {piercer.city}, {piercer.state}
+                    </div>
+                    
+                    {piercer.rating > 0 && (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="flex">{renderStars(piercer.rating)}</div>
+                        <span className="text-sm text-muted-foreground">
+                          ({piercer.total_reviews})
+                        </span>
+                      </div>
+                    )}
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {piercer.experience_years && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {piercer.experience_years} anos de experiência
+                      </p>
+                    )}
+                    
+                    {piercer.specialties && piercer.specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {piercer.specialties.slice(0, 2).map((specialty, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {specialty}
+                          </Badge>
+                        ))}
+                        {piercer.specialties.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{piercer.specialties.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      {piercer.phone && (
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {piercer.instagram && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => window.open(`https://instagram.com/${piercer.instagram}`, '_blank')}
+                        >
+                          <Instagram className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {piercer.website && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => window.open(piercer.website!, '_blank')}
+                        >
+                          <Globe className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
