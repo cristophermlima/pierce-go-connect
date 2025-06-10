@@ -46,26 +46,42 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Definir preços baseado no tipo de plano
-    const priceMap = {
-      "event_organizer": "price_1O1234567890123456", // Substitua pelos seus price IDs reais
-      "supplier": "price_1O1234567890123457",
+    // Mapear os IDs dos produtos para preços
+    const productToPriceMap = {
+      "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
+      "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
+      "event_organizer_annual": "prod_SQUg2BW16WinLn"
     };
 
-    if (!priceMap[planType as keyof typeof priceMap]) {
+    const productId = productToPriceMap[planType as keyof typeof productToPriceMap];
+    
+    if (!productId) {
       throw new Error("Invalid plan type");
     }
+
+    // Buscar os preços do produto
+    const prices = await stripe.prices.list({
+      product: productId,
+      active: true,
+    });
+
+    if (prices.data.length === 0) {
+      throw new Error("No active prices found for this product");
+    }
+
+    // Usar o primeiro preço ativo encontrado
+    const priceId = prices.data[0].id;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: priceMap[planType as keyof typeof priceMap],
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/planos`,
       metadata: {
         user_id: user.id,
@@ -85,7 +101,7 @@ serve(async (req) => {
       email: user.email,
       stripe_customer_id: customerId,
       subscription_tier: planType,
-      subscribed: false, // Será atualizado via webhook
+      subscribed: false, // Será atualizado quando o pagamento for confirmado
     });
 
     return new Response(JSON.stringify({ url: session.url }), {

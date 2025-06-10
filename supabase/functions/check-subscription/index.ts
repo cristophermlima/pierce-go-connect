@@ -18,7 +18,6 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
   
-  // Use the service role key to perform writes in Supabase
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -47,14 +46,13 @@ serve(async (req) => {
     
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    // Get the user's Stripe customer ID from profiles
-    const { data: profile, error: profileError } = await supabaseClient
-      .from("profiles")
-      .select("stripe_customer_id")
-      .eq("id", user.id)
-      .single();
+    // Buscar customer no Stripe
+    const customers = await stripe.customers.list({ 
+      email: user.email, 
+      limit: 1 
+    });
     
-    if (profileError || !profile?.stripe_customer_id) {
+    if (customers.data.length === 0) {
       logStep("No Stripe customer found for user");
       return new Response(JSON.stringify({ subscribed: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -62,10 +60,10 @@ serve(async (req) => {
       });
     }
     
-    const customerId = profile.stripe_customer_id;
+    const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
     
-    // Get the user's active subscriptions
+    // Buscar assinaturas ativas
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
@@ -81,13 +79,41 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       
-      // Determine subscription tier from price
+      // Determinar o tier baseado no produto
       const priceId = subscription.items.data[0].price.id;
-      subscriptionTier = subscription.items.data[0].price.nickname || "Standard";
-      logStep("Determined subscription tier", { priceId, subscriptionTier });
+      const price = await stripe.prices.retrieve(priceId);
+      const productId = price.product as string;
+      
+      // Mapear produto para tier
+      switch (productId) {
+        case "prod_SQUdR0VWmR9xTP":
+          subscriptionTier = "event_organizer_monthly";
+          break;
+        case "prod_SQUgNJsBMZGTvo":
+          subscriptionTier = "event_organizer_semester";
+          break;
+        case "prod_SQUg2BW16WinLn":
+          subscriptionTier = "event_organizer_annual";
+          break;
+        default:
+          subscriptionTier = "unknown";
+      }
+      
+      logStep("Determined subscription tier", { productId, subscriptionTier });
     } else {
       logStep("No active subscription found");
     }
+    
+    // Atualizar banco de dados
+    await supabaseClient.from("subscribers").upsert({
+      user_id: user.id,
+      email: user.email,
+      stripe_customer_id: customerId,
+      subscribed: hasActiveSub,
+      subscription_tier: subscriptionTier,
+      subscription_end: subscriptionEnd,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' });
     
     return new Response(
       JSON.stringify({
