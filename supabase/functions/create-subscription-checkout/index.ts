@@ -57,48 +57,72 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Mapear planos para Price IDs específicos do Stripe (prices recorrentes)
-    const planToPriceMap = {
-      // Planos de Organizadores de Eventos - usando Price IDs diretos
-      "event_organizer_monthly": "price_1RVdgHCYWZffZBhtmvnQdxeL", // R$ 19,90/mês
-      "event_organizer_semester": "price_1RVdgjCYWZffZBht0eIhftiA", // R$ 99,00/semestre  
-      "event_organizer_annual": "price_1RVdhWCYWZffZBht72uFJNHB", // R$ 179,00/ano
-      // Planos de Fornecedores - usando Price IDs diretos
-      "supplier_monthly": "price_1RYcJ3CYWZffZBhtUOyEMXX0", // R$ 29,90/mês
-      "supplier_semester": "price_1RYcJNCYWZffZBhtMcfbGwu9", // R$ 149,90/semestre
-      "supplier_annual": "price_1RYcJZCYWZffZBht0EC1tjNE" // R$ 239,00/ano
+    // Mapear planos para IDs de produto no Stripe
+    const planToProductMap = {
+      // Planos de Organizadores de Eventos - IDs de produtos corretos
+      "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
+      "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
+      "event_organizer_annual": "prod_SQUg2BW16WinLn",
+      // Planos de Fornecedores
+      "supplier_monthly": "prod_STZR8DAaoXrmF7",
+      "supplier_semester": "prod_STZRRDrEudMW6I",
+      "supplier_annual": "prod_STZS3pbB4tT5TL"
     };
 
-    const priceId = planToPriceMap[planType as keyof typeof planToPriceMap];
+    const productId = planToProductMap[planType as keyof typeof planToProductMap];
     
-    if (!priceId) {
-      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToPriceMap) });
+    if (!productId) {
+      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToProductMap) });
       throw new Error(`Invalid plan type: ${planType}`);
     }
 
-    logStep("Using price ID", { priceId, planType });
+    logStep("Using product ID", { productId, planType });
 
-    // Verificar se o price existe e é recorrente
-    try {
-      const price = await stripe.prices.retrieve(priceId);
-      logStep("Price details", { 
-        priceId, 
-        type: price.type, 
-        recurring: price.recurring,
-        active: price.active 
+    // Buscar os preços recorrentes do produto
+    const prices = await stripe.prices.list({
+      product: productId,
+      active: true,
+      type: 'recurring', // Filtrar apenas preços recorrentes
+    });
+
+    if (prices.data.length === 0) {
+      logStep("No recurring prices found, attempting to create one", { productId });
+      
+      // Mapear valores por plano
+      const planPrices = {
+        "event_organizer_monthly": { amount: 1990, interval: "month" }, // R$ 19,90
+        "event_organizer_semester": { amount: 9900, interval: "month", interval_count: 6 }, // R$ 99,00 a cada 6 meses
+        "event_organizer_annual": { amount: 17900, interval: "year" }, // R$ 179,00 por ano
+        "supplier_monthly": { amount: 2990, interval: "month" }, // R$ 29,90
+        "supplier_semester": { amount: 14990, interval: "month", interval_count: 6 }, // R$ 149,90 a cada 6 meses
+        "supplier_annual": { amount: 23900, interval: "year" } // R$ 239,00 por ano
+      };
+
+      const priceConfig = planPrices[planType as keyof typeof planPrices];
+      
+      if (!priceConfig) {
+        throw new Error(`No price configuration found for plan: ${planType}`);
+      }
+
+      // Criar preço recorrente
+      const newPrice = await stripe.prices.create({
+        product: productId,
+        unit_amount: priceConfig.amount,
+        currency: 'brl',
+        recurring: {
+          interval: priceConfig.interval as 'month' | 'year',
+          interval_count: priceConfig.interval_count || 1,
+        },
       });
+
+      logStep("Created new recurring price", { priceId: newPrice.id, productId });
       
-      if (price.type !== 'recurring') {
-        throw new Error(`Price ${priceId} is not a recurring price`);
-      }
-      
-      if (!price.active) {
-        throw new Error(`Price ${priceId} is not active`);
-      }
-    } catch (error) {
-      logStep("Error retrieving price", { priceId, error: error.message });
-      throw new Error(`Invalid price ID: ${priceId}`);
+      prices.data.push(newPrice);
     }
+
+    // Usar o primeiro preço recorrente encontrado
+    const priceId = prices.data[0].id;
+    logStep("Using price", { priceId, productId });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
