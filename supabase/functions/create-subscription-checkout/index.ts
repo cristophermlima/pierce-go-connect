@@ -57,40 +57,48 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Mapear planos para IDs de produto no Stripe
-    const planToProductMap = {
-      // Planos de Organizadores de Eventos
-      "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
-      "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
-      "event_organizer_annual": "prod_SQUg2BW16WinLn",
-      // Planos de Fornecedores
-      "supplier_monthly": "prod_STZR8DAaoXrmF7",
-      "supplier_semester": "prod_STZRRDrEudMW6I",
-      "supplier_annual": "prod_STZS3pbB4tT5TL"
+    // Mapear planos para Price IDs específicos do Stripe (prices recorrentes)
+    const planToPriceMap = {
+      // Planos de Organizadores de Eventos - usando Price IDs diretos
+      "event_organizer_monthly": "price_1RVdgHCYWZffZBhtmvnQdxeL", // R$ 19,90/mês
+      "event_organizer_semester": "price_1RVdgjCYWZffZBht0eIhftiA", // R$ 99,00/semestre  
+      "event_organizer_annual": "price_1RVdhWCYWZffZBht72uFJNHB", // R$ 179,00/ano
+      // Planos de Fornecedores - usando Price IDs diretos
+      "supplier_monthly": "price_1RYcJ3CYWZffZBhtUOyEMXX0", // R$ 29,90/mês
+      "supplier_semester": "price_1RYcJNCYWZffZBhtMcfbGwu9", // R$ 149,90/semestre
+      "supplier_annual": "price_1RYcJZCYWZffZBht0EC1tjNE" // R$ 239,00/ano
     };
 
-    const productId = planToProductMap[planType as keyof typeof planToProductMap];
+    const priceId = planToPriceMap[planType as keyof typeof planToPriceMap];
     
-    if (!productId) {
-      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToProductMap) });
+    if (!priceId) {
+      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToPriceMap) });
       throw new Error(`Invalid plan type: ${planType}`);
     }
 
-    logStep("Using product ID", { productId, planType });
+    logStep("Using price ID", { priceId, planType });
 
-    // Buscar os preços do produto
-    const prices = await stripe.prices.list({
-      product: productId,
-      active: true,
-    });
-
-    if (prices.data.length === 0) {
-      throw new Error(`No active prices found for product: ${productId}`);
+    // Verificar se o price existe e é recorrente
+    try {
+      const price = await stripe.prices.retrieve(priceId);
+      logStep("Price details", { 
+        priceId, 
+        type: price.type, 
+        recurring: price.recurring,
+        active: price.active 
+      });
+      
+      if (price.type !== 'recurring') {
+        throw new Error(`Price ${priceId} is not a recurring price`);
+      }
+      
+      if (!price.active) {
+        throw new Error(`Price ${priceId} is not active`);
+      }
+    } catch (error) {
+      logStep("Error retrieving price", { priceId, error: error.message });
+      throw new Error(`Invalid price ID: ${priceId}`);
     }
-
-    // Usar o primeiro preço ativo encontrado
-    const priceId = prices.data[0].id;
-    logStep("Using price", { priceId, productId });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
