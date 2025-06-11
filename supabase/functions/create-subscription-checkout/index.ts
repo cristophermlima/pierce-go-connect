@@ -57,95 +57,40 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Mapear diretamente para os IDs dos preços (não produtos)
-    const planToPriceMap = {
-      "event_organizer_monthly": "price_1RJmCjCYWZffZBht8TDOqgxu", // Preço mensal R$ 19,90
-      "event_organizer_semester": "price_1RJmDGCYWZffZBhtUzKLz8Yp", // Preço semestral R$ 99,00
-      "event_organizer_annual": "price_1RJmDaCYWZffZBhtlvwKnQEo" // Preço anual R$ 179,00
+    // Mapear planos para IDs de produto no Stripe
+    const planToProductMap = {
+      // Planos de Organizadores de Eventos
+      "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
+      "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
+      "event_organizer_annual": "prod_SQUg2BW16WinLn",
+      // Planos de Fornecedores
+      "supplier_monthly": "prod_STZR8DAaoXrmF7",
+      "supplier_semester": "prod_STZRRDrEudMW6I",
+      "supplier_annual": "prod_STZS3pbB4tT5TL"
     };
 
-    const priceId = planToPriceMap[planType as keyof typeof planToPriceMap];
+    const productId = planToProductMap[planType as keyof typeof planToProductMap];
     
-    if (!priceId) {
-      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToPriceMap) });
+    if (!productId) {
+      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToProductMap) });
       throw new Error(`Invalid plan type: ${planType}`);
     }
 
-    logStep("Using price ID", { priceId, planType });
+    logStep("Using product ID", { productId, planType });
 
-    // Verificar se o preço existe no Stripe
-    try {
-      const price = await stripe.prices.retrieve(priceId);
-      logStep("Price verified", { priceId, amount: price.unit_amount, currency: price.currency });
-    } catch (error) {
-      logStep("Price not found, creating checkout with product fallback", { priceId, error: error.message });
-      
-      // Fallback: usar os IDs dos produtos para buscar preços
-      const productToPriceMap = {
-        "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
-        "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
-        "event_organizer_annual": "prod_SQUg2BW16WinLn"
-      };
+    // Buscar os preços do produto
+    const prices = await stripe.prices.list({
+      product: productId,
+      active: true,
+    });
 
-      const productId = productToPriceMap[planType as keyof typeof productToPriceMap];
-      
-      if (!productId) {
-        throw new Error(`Invalid plan type: ${planType}`);
-      }
-
-      // Buscar os preços do produto
-      const prices = await stripe.prices.list({
-        product: productId,
-        active: true,
-      });
-
-      if (prices.data.length === 0) {
-        throw new Error(`No active prices found for product: ${productId}`);
-      }
-
-      // Usar o primeiro preço ativo encontrado
-      const fallbackPriceId = prices.data[0].id;
-      logStep("Using fallback price", { fallbackPriceId, productId });
-      
-      const session = await stripe.checkout.sessions.create({
-        customer: customerId,
-        line_items: [
-          {
-            price: fallbackPriceId,
-            quantity: 1,
-          },
-        ],
-        mode: "subscription",
-        success_url: `${req.headers.get("origin")}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.get("origin")}/planos`,
-        metadata: {
-          user_id: user.id,
-          plan_type: planType,
-        },
-      });
-
-      logStep("Checkout session created with fallback", { sessionId: session.id });
-
-      // Salvar informação inicial da assinatura
-      const supabaseService = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
-
-      await supabaseService.from("subscribers").upsert({
-        user_id: user.id,
-        email: user.email,
-        stripe_customer_id: customerId,
-        subscription_tier: planType,
-        subscribed: false, // Será atualizado quando o pagamento for confirmado
-      });
-
-      return new Response(JSON.stringify({ url: session.url }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+    if (prices.data.length === 0) {
+      throw new Error(`No active prices found for product: ${productId}`);
     }
+
+    // Usar o primeiro preço ativo encontrado
+    const priceId = prices.data[0].id;
+    logStep("Using price", { priceId, productId });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

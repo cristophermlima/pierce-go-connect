@@ -85,19 +85,18 @@ serve(async (req) => {
       const productId = price.product as string;
       
       // Mapear produto para tier
-      switch (productId) {
-        case "prod_SQUdR0VWmR9xTP":
-          subscriptionTier = "event_organizer_monthly";
-          break;
-        case "prod_SQUgNJsBMZGTvo":
-          subscriptionTier = "event_organizer_semester";
-          break;
-        case "prod_SQUg2BW16WinLn":
-          subscriptionTier = "event_organizer_annual";
-          break;
-        default:
-          subscriptionTier = "unknown";
-      }
+      const productToTierMap = {
+        // Planos de Organizadores de Eventos
+        "prod_SQUdR0VWmR9xTP": "event_organizer_monthly",
+        "prod_SQUgNJsBMZGTvo": "event_organizer_semester",
+        "prod_SQUg2BW16WinLn": "event_organizer_annual",
+        // Planos de Fornecedores
+        "prod_STZR8DAaoXrmF7": "supplier_monthly",
+        "prod_STZRRDrEudMW6I": "supplier_semester",
+        "prod_STZS3pbB4tT5TL": "supplier_annual"
+      };
+      
+      subscriptionTier = productToTierMap[productId as keyof typeof productToTierMap] || "unknown";
       
       logStep("Determined subscription tier", { productId, subscriptionTier });
     } else {

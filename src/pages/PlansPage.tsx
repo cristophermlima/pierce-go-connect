@@ -3,13 +3,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { Check, Crown, Star } from "lucide-react";
 
-const plans = [
+const eventOrganizerPlans = [
   {
     id: "event_organizer_monthly",
     name: "Presença Básica",
@@ -72,11 +73,68 @@ const plans = [
   }
 ];
 
-const extraServices = [
-  "Evento extra (fora do limite do plano)",
-  "Criação de arte de divulgação (feed ou stories)",
-  "Repost nos stories do @PiercerGo",
-  "Inclusão extra na newsletter"
+const supplierPlans = [
+  {
+    id: "supplier_monthly",
+    name: "Fornecedor Básico",
+    price: "R$ 29,90",
+    period: "/mês",
+    originalPrice: null,
+    description: "Ideal para fornecedores que querem começar a divulgar seus produtos",
+    features: [
+      "Listagem no diretório de fornecedores",
+      "Página com informações básicas e contato",
+      "Até 5 fotos de produtos",
+      "Visibilidade nas buscas por categoria",
+      "Suporte por e-mail"
+    ],
+    popular: false,
+    color: "from-blue-500 to-cyan-500",
+    badge: "Mensal",
+    badgeColor: "bg-blue-500"
+  },
+  {
+    id: "supplier_semester",
+    name: "Fornecedor Destaque",
+    price: "R$ 149,90",
+    period: "/semestre",
+    originalPrice: "R$ 24,98/mês",
+    description: "Ideal para fornecedores estabelecidos que querem mais visibilidade",
+    features: [
+      "Tudo do plano básico",
+      "Destaque nas buscas por região",
+      "Até 15 fotos de produtos",
+      "Inclusão na newsletter mensal",
+      "Badge de 'Fornecedor Verificado'",
+      "Relatório de visualizações",
+      "Suporte prioritário"
+    ],
+    popular: true,
+    color: "from-purple-500 to-violet-500",
+    badge: "Semestral",
+    badgeColor: "bg-purple-500"
+  },
+  {
+    id: "supplier_annual",
+    name: "Fornecedor Premium",
+    price: "R$ 239,00",
+    period: "/ano",
+    originalPrice: "R$ 19,92/mês",
+    description: "Ideal para grandes fornecedores que querem máxima exposição",
+    features: [
+      "Tudo dos planos anteriores",
+      "Posicionamento premium nas buscas",
+      "Galeria ilimitada de produtos",
+      "Página customizada com banner",
+      "Inclusão em campanhas especiais",
+      "Análises detalhadas de performance",
+      "Suporte dedicado por WhatsApp"
+    ],
+    popular: false,
+    color: "from-amber-500 to-orange-500",
+    badge: "Anual",
+    badgeColor: "bg-amber-500"
+  }
 ];
 
 export default function PlansPage() {
@@ -108,91 +166,94 @@ export default function PlansPage() {
     }
   };
 
+  const renderPlans = (plans: typeof eventOrganizerPlans) => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      {plans.map((plan) => (
+        <Card key={plan.id} className={`relative ${plan.popular ? 'ring-2 ring-yellow-500 scale-105' : ''}`}>
+          <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.badgeColor}`}>
+            {plan.popular && <Star className="w-3 h-3 mr-1" />}
+            {plan.badge}
+            {plan.popular && " - Mais Popular"}
+          </Badge>
+          
+          <CardHeader>
+            <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${plan.color} flex items-center justify-center mb-4`}>
+              <Crown className="w-6 h-6 text-white" />
+            </div>
+            <CardTitle className="text-2xl">{plan.name}</CardTitle>
+            <CardDescription>{plan.description}</CardDescription>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold">{plan.price}</span>
+              <span className="text-muted-foreground">{plan.period}</span>
+            </div>
+            {plan.originalPrice && (
+              <p className="text-sm text-green-600 font-medium">
+                Equivale a {plan.originalPrice}
+              </p>
+            )}
+          </CardHeader>
+          
+          <CardContent>
+            <ul className="space-y-3 mb-6">
+              {plan.features.map((feature, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            
+            <Button 
+              onClick={() => handleSubscribe(plan.id)}
+              disabled={loading === plan.id}
+              className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90`}
+            >
+              {loading === plan.id ? "Processando..." : "Assinar Agora"}
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
   return (
     <MainLayout>
       <div className="container py-10">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold mb-4">
-            Planos para <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Organizadores de Eventos</span>
+            Planos para <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Profissionais</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Escolha o plano ideal para divulgar seus eventos e cursos de body piercing
+            Escolha o plano ideal para seu perfil profissional no mundo do body piercing
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-12">
-          {plans.map((plan) => (
-            <Card key={plan.id} className={`relative ${plan.popular ? 'ring-2 ring-yellow-500 scale-105' : ''}`}>
-              <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.badgeColor}`}>
-                {plan.popular && <Star className="w-3 h-3 mr-1" />}
-                {plan.badge}
-                {plan.popular && " - Mais Popular"}
-              </Badge>
-              
-              <CardHeader>
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${plan.color} flex items-center justify-center mb-4`}>
-                  <Crown className="w-6 h-6 text-white" />
-                </div>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
-                </div>
-                {plan.originalPrice && (
-                  <p className="text-sm text-green-600 font-medium">
-                    Equivale a {plan.originalPrice}
-                  </p>
-                )}
-              </CardHeader>
-              
-              <CardContent>
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Button 
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={loading === plan.id}
-                  className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90`}
-                >
-                  {loading === plan.id ? "Processando..." : "Assinar Agora"}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Serviços Extras */}
-        <div className="max-w-4xl mx-auto">
-          <Card className="border-dashed border-2 border-purple-300">
-            <CardHeader>
-              <CardTitle className="text-xl text-center">
-                🧩 Serviços Extras (Disponíveis para Plano Anual)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {extraServices.map((service, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-sm">{service}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="text-center mt-6">
-                <p className="text-sm text-muted-foreground">
-                  Entre em contato para saber mais sobre os serviços extras
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs defaultValue="organizers" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-10">
+            <TabsTrigger value="organizers">Organizadores de Eventos</TabsTrigger>
+            <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="organizers" className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold mb-2">Planos para Organizadores de Eventos</h2>
+              <p className="text-muted-foreground">
+                Divulgue seus eventos e cursos de body piercing para milhares de pessoas
+              </p>
+            </div>
+            {renderPlans(eventOrganizerPlans)}
+          </TabsContent>
+          
+          <TabsContent value="suppliers" className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold mb-2">Planos para Fornecedores</h2>
+              <p className="text-muted-foreground">
+                Mostre seus produtos e serviços para profissionais e entusiastas do piercing
+              </p>
+            </div>
+            {renderPlans(supplierPlans)}
+          </TabsContent>
+        </Tabs>
 
         <div className="text-center mt-10">
           <p className="text-sm text-muted-foreground">
