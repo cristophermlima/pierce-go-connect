@@ -39,7 +39,7 @@ export function PlansTabs() {
   };
 
   const renderPlans = (plans: typeof piercerPlans) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
       {plans.map((plan) => (
         <PlanCard
           key={plan.id}
@@ -53,7 +53,7 @@ export function PlansTabs() {
 
   return (
     <Tabs defaultValue="piercers" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-10">
+      <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 max-w-2xl mx-auto mb-10 gap-2 sm:gap-0">
         <TabsTrigger value="piercers">Piercers</TabsTrigger>
         <TabsTrigger value="organizers">Organizadores de Eventos</TabsTrigger>
         <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
