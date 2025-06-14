@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,9 +127,12 @@ export default function PiercersPage() {
     setFilteredPiercers(filtered);
   };
 
-  const cities = [...new Set(piercers.map(p => p.city))].sort();
-  const states = [...new Set(piercers.map(p => p.state))].sort();
-  const allSpecialties = [...new Set(piercers.flatMap(p => p.specialties || []))].sort();
+  // Corrigir arrays para não incluir valores vazios
+  const cities = [...new Set(piercers.map(p => p.city).filter(Boolean).filter(city => city !== ''))].sort();
+  const states = [...new Set(piercers.map(p => p.state).filter(Boolean).filter(state => state !== ''))].sort();
+  const allSpecialties = [...new Set(
+    piercers.flatMap(p => (p.specialties || [])).filter(Boolean).filter(s => s !== '')
+  )].sort();
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
