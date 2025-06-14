@@ -16,8 +16,7 @@ export const piercerPlans = [
     popular: false,
     color: "from-indigo-500 to-fuchsia-500",
     badge: "Mensal",
-    badgeColor: "bg-indigo-500",
-    trialDays: 7 // trial de 7 dias mensais para demonstração
+    badgeColor: "bg-indigo-500"
   },
   {
     id: "piercer_annual",
@@ -35,7 +34,6 @@ export const piercerPlans = [
     popular: true,
     color: "from-pink-500 to-purple-500",
     badge: "Anual",
-    badgeColor: "bg-pink-500",
-    trialDays: 14 // exemplo: trial de 14 dias anual
+    badgeColor: "bg-pink-500"
   }
 ];

@@ -27,10 +27,6 @@ export function PlanCard({ plan, loading, onSubscribe }: PlanCardProps) {
     <Card 
       className={`relative flex flex-col justify-between w-full max-w-md mx-auto md:mx-0 ${plan.popular ? 'ring-2 ring-yellow-500 scale-105' : ''} transition-transform duration-150`}
     >
-      {/* Trial info visual se disponível */}
-      {plan.trialDays && (
-        <span className="absolute top-3 right-3 bg-green-200 text-green-900 text-xs font-semibold px-3 py-1 rounded-full z-10 shadow">Trial {plan.trialDays} dias grátis</span>
-      )}
       <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.badgeColor} px-3 py-1 text-base flex items-center`}>
         {plan.popular && <Star className="w-3 h-3 mr-1" />}
         {plan.badge}
@@ -66,7 +62,7 @@ export function PlanCard({ plan, loading, onSubscribe }: PlanCardProps) {
           disabled={loading}
           className={`w-full bg-gradient-to-r ${plan.color} hover:opacity-90 py-2 text-base font-semibold rounded-md`}
         >
-          {loading ? "Processando..." : plan.trialDays ? `Testar Grátis (${plan.trialDays} dias)` : "Assinar Agora"}
+          {loading ? "Processando..." : "Assinar Agora"}
         </Button>
       </CardContent>
     </Card>
