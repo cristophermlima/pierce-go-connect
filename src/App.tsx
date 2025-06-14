@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -35,6 +34,7 @@ import AdminEventsPage from "@/pages/AdminEventsPage";
 import AdminSuppliersPage from "@/pages/AdminSuppliersPage";
 import SupplierDashboardPage from "@/pages/SupplierDashboardPage";
 import OrganizerDashboardPage from "@/pages/OrganizerDashboardPage";
+import FAQAssinaturasPage from "@/pages/FAQAssinaturasPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +63,8 @@ function App() {
               <Route path="/avaliacoes" element={<EvaluationsPage />} />
               <Route path="/cadastrar" element={<SubmitPage />} />
               <Route path="/planos" element={<PlansPage />} />
+              {/* FAQ – Dúvidas frequentes sobre assinaturas */}
+              <Route path="/faq-assinaturas" element={<FAQAssinaturasPage />} />
               <Route path="/piercers" element={<PiercersPage />} />
               <Route path="/aprender" element={<LearningPage />} />
               <Route path="/sucesso" element={<SuccessPage />} />
