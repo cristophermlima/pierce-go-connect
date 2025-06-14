@@ -25,7 +25,7 @@ export default function SuppliersPage() {
       location: "Nacional",
       rating: "4.8",
       reviews: "56",
-      image: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     },
     {
       name: "Style & Body",
@@ -33,7 +33,7 @@ export default function SuppliersPage() {
       location: "São Paulo, SP",
       rating: "4.6",
       reviews: "42",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     },
     {
       name: "Pro Equipment",
@@ -41,7 +41,7 @@ export default function SuppliersPage() {
       location: "Rio de Janeiro, RJ",
       rating: "4.9",
       reviews: "38",
-      image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     },
     {
       name: "Body Care Supplies",
@@ -49,7 +49,7 @@ export default function SuppliersPage() {
       location: "Belo Horizonte, MG",
       rating: "4.7",
       reviews: "29",
-      image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     },
     {
       name: "Premium Body Art",
@@ -57,7 +57,7 @@ export default function SuppliersPage() {
       location: "Nacional",
       rating: "5.0",
       reviews: "18",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     },
     {
       name: "Safety First",
@@ -65,7 +65,7 @@ export default function SuppliersPage() {
       location: "Curitiba, PR",
       rating: "4.8",
       reviews: "33",
-      image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=2070&auto=format&fit=crop"
+      image: ""
     }
   ];
 
@@ -129,3 +129,4 @@ export default function SuppliersPage() {
     </MainLayout>
   );
 }
+
