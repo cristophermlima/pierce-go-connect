@@ -150,6 +150,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (!error) {
         toast.success("Cadastro realizado com sucesso! Verifique seu email para confirmação.");
+        // Inserir na tabela 'piercers' automaticamente
+        // Esperar o profile ser criado via trigger - depois inserir piercer, caso ainda não exista
+        setTimeout(async () => {
+          const { data: userRecord } = await supabase.auth.getUser();
+          const userId = userRecord?.user?.id;
+          if (userId) {
+            // Buscar perfil para obter nome completo e cidade
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name, city')
+              .eq('id', userId)
+              .single();
+
+            // Inserir piercer somente se não existir já (previne duplicação)
+            const { data: existingPiercer } = await supabase
+              .from('piercers')
+              .select('id')
+              .eq('user_id', userId)
+              .maybeSingle();
+
+            if (!existingPiercer && profile) {
+              await supabase.from('piercers').insert({
+                user_id: userId,
+                name: profile.full_name ?? "Nome",
+                city: profile.city ?? "",
+                state: "",
+                country: "Brasil",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+            }
+          }
+        }, 1200); // Pequeno delay: aguardar profile via trigger
       }
       
       return { error };
