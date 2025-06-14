@@ -1,7 +1,5 @@
-
 import MainLayout from "@/components/MainLayout";
 import { PlansTabs } from "@/components/plans/PlansTabs";
-import { PlansPromoBanner } from "@/components/plans/PlansPromoBanner";
 import { Link } from "react-router-dom";
 
 export default function PlansPage() {
@@ -21,8 +19,6 @@ export default function PlansPage() {
             </Link>
           </div>
         </div>
-
-        <PlansPromoBanner />
 
         <PlansTabs />
 
