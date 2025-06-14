@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,6 +136,45 @@ const supplierPlans = [
   }
 ];
 
+const piercerPlans = [
+  {
+    id: "piercer_monthly",
+    name: "Piercer Premium Mensal",
+    price: "R$ 9,90",
+    period: "/mês",
+    originalPrice: null,
+    description: "Assinatura mensal para piercers profissionais com benefícios exclusivos.",
+    features: [
+      "Destacar perfil no diretório de piercers",
+      "Prioridade nas pesquisas regionais",
+      "Acesso a recursos premium da plataforma",
+      "Suporte dedicado via WhatsApp"
+    ],
+    popular: false,
+    color: "from-indigo-500 to-fuchsia-500",
+    badge: "Mensal",
+    badgeColor: "bg-indigo-500"
+  },
+  {
+    id: "piercer_annual",
+    name: "Piercer Premium Anual",
+    price: "R$ 79,90",
+    period: "/ano",
+    originalPrice: "Equivale a R$ 6,66/mês",
+    description: "Assinatura anual com desconto para piercers que querem sempre visibilidade máxima.",
+    features: [
+      "Todos benefícios do plano mensal",
+      "Desconto exclusivo anual",
+      "Convites para eventos exclusivos",
+      "Brindes e campanhas promocionais"
+    ],
+    popular: true,
+    color: "from-pink-500 to-purple-500",
+    badge: "Anual",
+    badgeColor: "bg-pink-500"
+  }
+];
+
 export default function PlansPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
@@ -188,7 +226,7 @@ export default function PlansPage() {
             </div>
             {plan.originalPrice && (
               <p className="text-sm text-green-600 font-medium">
-                Equivale a {plan.originalPrice}
+                {plan.originalPrice}
               </p>
             )}
           </CardHeader>
@@ -228,12 +266,23 @@ export default function PlansPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="organizers" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-10">
+        <Tabs defaultValue="piercers" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-10">
+            <TabsTrigger value="piercers">Piercers</TabsTrigger>
             <TabsTrigger value="organizers">Organizadores de Eventos</TabsTrigger>
             <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
           </TabsList>
           
+          <TabsContent value="piercers" className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold mb-2">Planos para Piercers</h2>
+              <p className="text-muted-foreground">
+                Tenha destaque e recursos exclusivos sendo assinante premium como piercer.
+              </p>
+            </div>
+            {renderPlans(piercerPlans as any)}
+          </TabsContent>
+
           <TabsContent value="organizers" className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold mb-2">Planos para Organizadores de Eventos</h2>

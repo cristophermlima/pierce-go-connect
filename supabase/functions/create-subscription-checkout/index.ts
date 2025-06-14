@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -57,72 +56,80 @@ serve(async (req) => {
       logStep("Created new customer", { customerId });
     }
 
-    // Mapear planos para IDs de produto no Stripe
-    const planToProductMap = {
-      // Planos de Organizadores de Eventos - IDs de produtos corretos
-      "event_organizer_monthly": "prod_SQUdR0VWmR9xTP",
-      "event_organizer_semester": "prod_SQUgNJsBMZGTvo", 
-      "event_organizer_annual": "prod_SQUg2BW16WinLn",
-      // Planos de Fornecedores
-      "supplier_monthly": "prod_STZR8DAaoXrmF7",
-      "supplier_semester": "prod_STZRRDrEudMW6I",
-      "supplier_annual": "prod_STZS3pbB4tT5TL"
+    // Novo: Mapear planos para Price IDs (Piercer)
+    const planToPriceMap = {
+      // Piercer Plans (produtos fornecidos por você)
+      "piercer_monthly": { product: "prod_SV13zvYOoMqE2t", price: "price_1Ra11LCYWZffZBhtqNKkORwR" },
+      "piercer_annual": { product: "prod_SV14bPmy2Tezsx", price: "price_1Ra12ICYWZffZBhtVr2GvDIb" },
+      // Organizadores de Eventos
+      "event_organizer_monthly": { product: "prod_SQUdR0VWmR9xTP" },
+      "event_organizer_semester": { product: "prod_SQUgNJsBMZGTvo" },
+      "event_organizer_annual": { product: "prod_SQUg2BW16WinLn" },
+      // Fornecedores
+      "supplier_monthly": { product: "prod_STZR8DAaoXrmF7" },
+      "supplier_semester": { product: "prod_STZRRDrEudMW6I" },
+      "supplier_annual": { product: "prod_STZS3pbB4tT5TL" }
     };
 
-    const productId = planToProductMap[planType as keyof typeof planToProductMap];
+    const config = planToPriceMap[planType as keyof typeof planToPriceMap];
     
-    if (!productId) {
-      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToProductMap) });
+    if (!config) {
+      logStep("Invalid plan type", { planType, availablePlans: Object.keys(planToPriceMap) });
       throw new Error(`Invalid plan type: ${planType}`);
     }
 
-    logStep("Using product ID", { productId, planType });
+    let priceId = config.price;
 
-    // Buscar os preços recorrentes do produto
-    const prices = await stripe.prices.list({
-      product: productId,
-      active: true,
-      type: 'recurring', // Filtrar apenas preços recorrentes
-    });
-
-    if (prices.data.length === 0) {
-      logStep("No recurring prices found, attempting to create one", { productId });
-      
-      // Mapear valores por plano
-      const planPrices = {
-        "event_organizer_monthly": { amount: 1990, interval: "month" }, // R$ 19,90
-        "event_organizer_semester": { amount: 9900, interval: "month", interval_count: 6 }, // R$ 99,00 a cada 6 meses
-        "event_organizer_annual": { amount: 17900, interval: "year" }, // R$ 179,00 por ano
-        "supplier_monthly": { amount: 2990, interval: "month" }, // R$ 29,90
-        "supplier_semester": { amount: 14990, interval: "month", interval_count: 6 }, // R$ 149,90 a cada 6 meses
-        "supplier_annual": { amount: 23900, interval: "year" } // R$ 239,00 por ano
-      };
-
-      const priceConfig = planPrices[planType as keyof typeof planPrices];
-      
-      if (!priceConfig) {
-        throw new Error(`No price configuration found for plan: ${planType}`);
-      }
-
-      // Criar preço recorrente
-      const newPrice = await stripe.prices.create({
-        product: productId,
-        unit_amount: priceConfig.amount,
-        currency: 'brl',
-        recurring: {
-          interval: priceConfig.interval as 'month' | 'year',
-          interval_count: priceConfig.interval_count || 1,
-        },
+    // Se for plano Piercer e já temos o Price ID, usar ele!
+    if (priceId) {
+      logStep("Using pre-defined Price ID", { priceId });
+    } else {
+      // Buscar os preços recorrentes do produto original (demais planos, igual antes)
+      const prices = await stripe.prices.list({
+        product: config.product,
+        active: true,
+        type: 'recurring',
       });
 
-      logStep("Created new recurring price", { priceId: newPrice.id, productId });
-      
-      prices.data.push(newPrice);
+      if (prices.data.length === 0) {
+        logStep("No recurring prices found, attempting to create one", { productId: config.product });
+        
+        // Mapear valores por plano
+        const planPrices = {
+          "event_organizer_monthly": { amount: 1990, interval: "month" }, // R$ 19,90
+          "event_organizer_semester": { amount: 9900, interval: "month", interval_count: 6 }, // R$ 99,00 a cada 6 meses
+          "event_organizer_annual": { amount: 17900, interval: "year" }, // R$ 179,00 por ano
+          "supplier_monthly": { amount: 2990, interval: "month" }, // R$ 29,90
+          "supplier_semester": { amount: 14990, interval: "month", interval_count: 6 }, // R$ 149,90 a cada 6 meses
+          "supplier_annual": { amount: 23900, interval: "year" } // R$ 239,00 por ano
+        };
+
+        const priceConfig = planPrices[planType as keyof typeof planPrices];
+        
+        if (!priceConfig) {
+          throw new Error(`No price configuration found for plan: ${planType}`);
+        }
+
+        // Criar preço recorrente
+        const newPrice = await stripe.prices.create({
+          product: config.product,
+          unit_amount: priceConfig.amount,
+          currency: 'brl',
+          recurring: {
+            interval: priceConfig.interval as 'month' | 'year',
+            interval_count: priceConfig.interval_count || 1,
+          },
+        });
+
+        logStep("Created new recurring price", { priceId: newPrice.id, productId: config.product });
+        
+        prices.data.push(newPrice);
+      }
+
+      priceId = prices.data[0].id;
     }
 
-    // Usar o primeiro preço recorrente encontrado
-    const priceId = prices.data[0].id;
-    logStep("Using price", { priceId, productId });
+    logStep("Using price", { priceId });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
