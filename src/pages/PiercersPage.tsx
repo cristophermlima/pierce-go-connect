@@ -60,7 +60,36 @@ export default function PiercersPage() {
 
       if (error) throw error;
 
-      setPiercers(data || []);
+      // Se não houver piercers cadastrados, adiciona um fictício apenas para ilustração visual
+      if (!data || data.length === 0) {
+        setPiercers([
+          {
+            id: "ficticio-1",
+            user_id: null,
+            name: "Joana Fictícia",
+            bio: "Especialista em perfurações de orelha, nariz e boca. Mais de 10 anos de experiência em studios renomados.",
+            experience_years: 10,
+            specialties: ["Orelha", "Nariz", "Microdermal", "Industrial"],
+            city: "São Paulo",
+            state: "SP",
+            country: "Brasil",
+            phone: "(11) 99999-9999",
+            instagram: "joanafakepiercing",
+            website: "https://joanafakepiercing.com.br",
+            portfolio_images: [
+              "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
+            ],
+            rating: 4.9,
+            total_reviews: 48,
+            verified: true,
+            featured: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        ]);
+      } else {
+        setPiercers(data);
+      }
     } catch (error) {
       console.error('Error fetching piercers:', error);
       toast.error("Erro ao carregar piercers");
