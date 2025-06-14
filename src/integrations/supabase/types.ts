@@ -249,7 +249,7 @@ export type Database = {
           safety_rating: number | null
           supplier_id: string | null
           supplier_name: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           comment: string
@@ -266,7 +266,7 @@ export type Database = {
           safety_rating?: number | null
           supplier_id?: string | null
           supplier_name?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           comment?: string
@@ -283,7 +283,7 @@ export type Database = {
           safety_rating?: number | null
           supplier_id?: string | null
           supplier_name?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
