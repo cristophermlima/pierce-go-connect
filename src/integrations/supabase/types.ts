@@ -14,7 +14,336 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          description: string | null
+          id: string
+          image: string | null
+          location: string | null
+          organizer_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          organizer_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          organizer_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      learning_resources: {
+        Row: {
+          author: string | null
+          content_type: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          author?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          author?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
+      piercers: {
+        Row: {
+          bio: string | null
+          city: string | null
+          contact_info: Json | null
+          country: string | null
+          created_at: string | null
+          experience_years: number | null
+          id: string
+          name: string
+          portfolio_images: string[] | null
+          rating: number | null
+          review_count: number | null
+          specialties: string[] | null
+          state: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          contact_info?: Json | null
+          country?: string | null
+          created_at?: string | null
+          experience_years?: number | null
+          id?: string
+          name: string
+          portfolio_images?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          specialties?: string[] | null
+          state?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          contact_info?: Json | null
+          country?: string | null
+          created_at?: string | null
+          experience_years?: number | null
+          id?: string
+          name?: string
+          portfolio_images?: string[] | null
+          rating?: number | null
+          review_count?: number | null
+          specialties?: string[] | null
+          state?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          is_admin: boolean | null
+          state: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          is_admin?: boolean | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          state?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string | null
+          environment_rating: number | null
+          event_id: string | null
+          id: string
+          images: string[] | null
+          organization_rating: number | null
+          overall_rating: number | null
+          quality_rating: number | null
+          safety_rating: number | null
+          supplier_id: string | null
+          supplier_name: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          environment_rating?: number | null
+          event_id?: string | null
+          id?: string
+          images?: string[] | null
+          organization_rating?: number | null
+          overall_rating?: number | null
+          quality_rating?: number | null
+          safety_rating?: number | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          environment_rating?: number | null
+          event_id?: string | null
+          id?: string
+          images?: string[] | null
+          organization_rating?: number | null
+          overall_rating?: number | null
+          quality_rating?: number | null
+          safety_rating?: number | null
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_date: string
+          id: string
+          location: string | null
+          start_date: string
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          location?: string | null
+          start_date: string
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          location?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          category: string | null
+          contact_info: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image: string | null
+          location: string | null
+          name: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          contact_info?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          contact_info?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          location?: string | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      travel_plans: {
+        Row: {
+          created_at: string | null
+          destination: string
+          end_date: string | null
+          id: string
+          notes: string | null
+          start_date: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          destination: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          destination?: string
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
