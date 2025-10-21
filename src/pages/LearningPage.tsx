@@ -14,16 +14,9 @@ type LearningResource = {
   id: string;
   title: string;
   description: string | null;
-  type: "ebook" | "course";
-  category: string | null;
-  price: number | null;
-  affiliate_link: string;
-  cover_image: string | null;
+  content_type: string | null;
   author: string | null;
-  duration: string | null;
-  pages: number | null;
-  featured: boolean;
-  active: boolean;
+  url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -34,7 +27,6 @@ export default function LearningPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchResources();
@@ -42,25 +34,18 @@ export default function LearningPage() {
 
   useEffect(() => {
     filterResources();
-  }, [resources, searchTerm, typeFilter, categoryFilter]);
+  }, [resources, searchTerm, typeFilter]);
 
   const fetchResources = async () => {
     try {
       const { data, error } = await supabase
         .from('learning_resources')
         .select('*')
-        .eq('active', true)
-        .order('featured', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const typedData = (data || []).map(item => ({
-        ...item,
-        type: item.type as "ebook" | "course"
-      }));
-
-      setResources(typedData);
+      setResources(data || []);
     } catch (error) {
       console.error('Error fetching learning resources:', error);
       toast.error("Erro ao carregar recursos de aprendizado");
@@ -81,41 +66,17 @@ export default function LearningPage() {
     }
 
     if (typeFilter !== "all") {
-      filtered = filtered.filter(resource => resource.type === typeFilter);
-    }
-
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(resource => resource.category === categoryFilter);
+      filtered = filtered.filter(resource => resource.content_type === typeFilter);
     }
 
     setFilteredResources(filtered);
   };
 
-  const categories = [...new Set(resources.map(r => r.category).filter(Boolean))];
-
-  const ResourceCard = ({ resource, isFeatured = false }: { resource: LearningResource, isFeatured?: boolean }) => (
-    <Card className={`overflow-hidden transition-all duration-300 hover:shadow-xl ${isFeatured ? 'ring-2 ring-yellow-400 scale-105' : 'hover:scale-105'}`}>
-      {isFeatured && (
-        <Badge className="absolute top-4 right-4 bg-yellow-500 z-10">
-          <Star className="w-3 h-3 mr-1" />
-          Destaque
-        </Badge>
-      )}
-      
-      {resource.cover_image && (
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
-          <img 
-            src={resource.cover_image} 
-            alt={resource.title}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        </div>
-      )}
-      
+  const ResourceCard = ({ resource }: { resource: LearningResource }) => (
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2 mb-2">
-          {resource.type === 'ebook' ? (
+          {resource.content_type === 'ebook' ? (
             <div className="flex items-center gap-1 text-blue-600">
               <Book className="w-4 h-4" />
               <Badge variant="outline" className="text-blue-600 border-blue-600">E-book</Badge>
@@ -125,11 +86,6 @@ export default function LearningPage() {
               <Play className="w-4 h-4" />
               <Badge variant="outline" className="text-green-600 border-green-600">Curso</Badge>
             </div>
-          )}
-          {resource.category && (
-            <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-              {resource.category}
-            </Badge>
           )}
         </div>
         
@@ -152,56 +108,13 @@ export default function LearningPage() {
           </p>
         )}
         
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          {resource.type === 'ebook' && resource.pages && (
-            <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded">
-              <FileText className="w-3 h-3" />
-              {resource.pages} páginas
-            </div>
-          )}
-          {resource.type === 'course' && resource.duration && (
-            <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded">
-              <Clock className="w-3 h-3" />
-              {resource.duration}
-            </div>
-          )}
-          <div className="flex items-center gap-1 bg-purple-50 px-2 py-1 rounded">
-            <Award className="w-3 h-3" />
-            Certificado
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div>
-            {resource.price && (
-              <div className="text-2xl font-bold text-green-600">
-                R$ {resource.price.toFixed(2)}
-              </div>
-            )}
-            <div className="text-xs text-muted-foreground">
-              Acesso vitalício
-            </div>
-          </div>
-          
-          <Button 
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-            onClick={() => window.open(resource.affiliate_link, '_blank')}
-          >
-            Comprar Agora
-            <ExternalLink className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-        
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-          </div>
-          <span>4.9 (127 avaliações)</span>
-        </div>
+        <Button 
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+          onClick={() => resource.url && window.open(resource.url, '_blank')}
+        >
+          Ver Mais
+          <ExternalLink className="w-4 h-4 ml-2" />
+        </Button>
       </CardContent>
     </Card>
   );
@@ -244,7 +157,7 @@ export default function LearningPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -266,43 +179,15 @@ export default function LearningPage() {
             </SelectContent>
           </Select>
 
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {categories.map(category => (
-                <SelectItem key={category} value={category!}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <Button variant="outline" onClick={() => {
             setSearchTerm("");
             setTypeFilter("all");
-            setCategoryFilter("all");
           }}>
             Limpar filtros
           </Button>
         </div>
 
-        {/* Featured Resources */}
-        {filteredResources.some(r => r.featured) && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <Star className="w-6 h-6 text-yellow-400 fill-current" />
-              Recursos em Destaque
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredResources.filter(resource => resource.featured).map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} isFeatured={true} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* All Resources */}
+        {/* Resources */}
         <div>
           <h2 className="text-2xl font-bold mb-6">
             Todos os Recursos ({filteredResources.length})
@@ -315,7 +200,7 @@ export default function LearningPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredResources.filter(resource => !resource.featured).map((resource) => (
+              {filteredResources.map((resource) => (
                 <ResourceCard key={resource.id} resource={resource} />
               ))}
             </div>

@@ -21,12 +21,12 @@ import { useNavigate } from 'react-router-dom';
 interface EventListing {
   id: string;
   title: string;
-  type: string;
   location: string;
   created_at: string;
   views?: number;
   registrations?: number;
   event_date?: string;
+  organizer_id?: string;
 }
 
 interface EventReview {
@@ -57,7 +57,7 @@ export default function OrganizerDashboardPage() {
         const { data: eventsData, error: eventsError } = await supabase
           .from('events')
           .select('*')
-          .eq('creator_id', user.id);
+          .eq('organizer_id', user.id);
           
         if (eventsError) throw eventsError;
         
@@ -66,7 +66,7 @@ export default function OrganizerDashboardPage() {
           ...event,
           views: Math.floor(Math.random() * 120) + 30,
           registrations: Math.floor(Math.random() * 20) + 5,
-          event_date: new Date(new Date().getTime() + Math.random() * 10000000000).toISOString().split('T')[0]
+          event_date: event.date || new Date(event.created_at).toISOString().split('T')[0]
         }));
         
         setEvents(enhancedEvents || []);
@@ -194,7 +194,6 @@ export default function OrganizerDashboardPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
-                      <TableHead>Tipo</TableHead>
                       <TableHead>Data</TableHead>
                       <TableHead>Localização</TableHead>
                       <TableHead>Inscrições</TableHead>
@@ -206,7 +205,6 @@ export default function OrganizerDashboardPage() {
                     {events.map((event) => (
                       <TableRow key={event.id}>
                         <TableCell className="font-medium">{event.title}</TableCell>
-                        <TableCell>{event.type}</TableCell>
                         <TableCell>{event.event_date || "N/A"}</TableCell>
                         <TableCell>{event.location}</TableCell>
                         <TableCell>{event.registrations}</TableCell>

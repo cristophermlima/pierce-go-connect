@@ -19,12 +19,13 @@ import { toast } from "@/components/ui/sonner";
 
 interface SupplierListing {
   id: string;
-  title: string;
-  type: string;
-  location: string;
+  name: string;
+  category: string | null;
+  location: string | null;
   created_at: string;
   views?: number;
   clicks?: number;
+  user_id?: string;
 }
 
 interface SupplierReview {
@@ -53,7 +54,7 @@ export default function SupplierDashboardPage() {
         const { data: listingsData, error: listingsError } = await supabase
           .from('suppliers')
           .select('*')
-          .eq('creator_id', user.id);
+          .eq('user_id', user.id);
           
         if (listingsError) throw listingsError;
         
@@ -201,8 +202,8 @@ export default function SupplierDashboardPage() {
                   <TableBody>
                     {listings.map((listing) => (
                       <TableRow key={listing.id}>
-                        <TableCell className="font-medium">{listing.title}</TableCell>
-                        <TableCell>{listing.type}</TableCell>
+                        <TableCell className="font-medium">{listing.name}</TableCell>
+                        <TableCell>{listing.category || "N/A"}</TableCell>
                         <TableCell>{listing.location}</TableCell>
                         <TableCell>{listing.views}</TableCell>
                         <TableCell>

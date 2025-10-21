@@ -25,13 +25,14 @@ import { toast } from "@/components/ui/sonner";
 
 interface Supplier {
   id: string;
-  title: string;
-  type: string;
-  location: string;
+  name: string;
+  category: string | null;
+  location: string | null;
   image: string | null;
   created_at: string;
   creator_name: string;
   creator_email: string;
+  user_id?: string;
 }
 
 export default function AdminSuppliersPage() {
@@ -52,12 +53,12 @@ export default function AdminSuppliersPage() {
           .from('suppliers')
           .select(`
             id,
-            title,
-            type,
+            name,
+            category,
             location,
             image,
             created_at,
-            creator_id
+            user_id
           `)
           .order('created_at', { ascending: false });
           
@@ -66,8 +67,8 @@ export default function AdminSuppliersPage() {
         // Get creator details and add them to each supplier
         const enhancedSuppliers = data?.map(supplier => ({
           ...supplier,
-          creator_name: "Usuário " + supplier.creator_id?.substring(0, 8),
-          creator_email: `usuario_${supplier.creator_id?.substring(0, 6)}@exemplo.com`
+          creator_name: "Usuário " + supplier.user_id?.substring(0, 8),
+          creator_email: `usuario_${supplier.user_id?.substring(0, 6)}@exemplo.com`
         })) || [];
         
         setSuppliers(enhancedSuppliers);
@@ -103,8 +104,8 @@ export default function AdminSuppliersPage() {
   };
 
   const filteredSuppliers = suppliers.filter(supplier => 
-    supplier.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    supplier.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    supplier.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    supplier.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     supplier.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -175,8 +176,8 @@ export default function AdminSuppliersPage() {
               ) : (
                 filteredSuppliers.map((supplier) => (
                   <TableRow key={supplier.id}>
-                    <TableCell className="font-medium">{supplier.title}</TableCell>
-                    <TableCell>{supplier.type}</TableCell>
+                    <TableCell className="font-medium">{supplier.name}</TableCell>
+                    <TableCell>{supplier.category || "N/A"}</TableCell>
                     <TableCell className="hidden md:table-cell">{supplier.location}</TableCell>
                     <TableCell className="hidden md:table-cell">{supplier.creator_name || "Sistema"}</TableCell>
                     <TableCell className="hidden md:table-cell">

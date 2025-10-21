@@ -26,12 +26,12 @@ import { toast } from "@/components/ui/sonner";
 interface Event {
   id: string;
   title: string;
-  type: string;
   location: string;
   image: string | null;
   created_at: string;
   creator_name: string;
   event_date?: string;
+  organizer_id?: string;
 }
 
 export default function AdminEventsPage() {
@@ -53,11 +53,10 @@ export default function AdminEventsPage() {
           .select(`
             id,
             title,
-            type,
             location,
             image,
             created_at,
-            creator_id
+            organizer_id
           `)
           .order('created_at', { ascending: false });
           
@@ -67,8 +66,8 @@ export default function AdminEventsPage() {
         // In a real app, you would fetch these from profiles or do a join
         const enhancedEvents = data?.map(event => ({
           ...event,
-          creator_name: "Usuário " + event.creator_id?.substring(0, 8),
-          event_date: new Date(new Date().getTime() + Math.random() * 10000000000).toISOString().split('T')[0]
+          creator_name: "Usuário " + event.organizer_id?.substring(0, 8),
+          event_date: event.created_at ? new Date(event.created_at).toISOString().split('T')[0] : "N/A"
         })) || [];
         
         setEvents(enhancedEvents);
@@ -105,7 +104,6 @@ export default function AdminEventsPage() {
 
   const filteredEvents = events.filter(event => 
     event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    event.type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -150,7 +148,6 @@ export default function AdminEventsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
                 <TableHead className="hidden md:table-cell">Localização</TableHead>
                 <TableHead className="hidden md:table-cell">Data do Evento</TableHead>
                 <TableHead className="hidden md:table-cell">Criado por</TableHead>
@@ -161,7 +158,7 @@ export default function AdminEventsPage() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10">
+                  <TableCell colSpan={6} className="text-center py-10">
                     <div className="flex justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                     </div>
@@ -169,7 +166,7 @@ export default function AdminEventsPage() {
                 </TableRow>
               ) : filteredEvents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10">
+                  <TableCell colSpan={6} className="text-center py-10">
                     Nenhum evento encontrado
                   </TableCell>
                 </TableRow>
@@ -177,7 +174,6 @@ export default function AdminEventsPage() {
                 filteredEvents.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
-                    <TableCell>{event.type}</TableCell>
                     <TableCell className="hidden md:table-cell">{event.location}</TableCell>
                     <TableCell className="hidden md:table-cell">{event.event_date}</TableCell>
                     <TableCell className="hidden md:table-cell">{event.creator_name || "Sistema"}</TableCell>

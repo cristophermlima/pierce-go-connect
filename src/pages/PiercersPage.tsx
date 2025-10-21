@@ -20,14 +20,9 @@ type Piercer = {
   city: string;
   state: string;
   country: string;
-  phone: string | null;
-  instagram: string | null;
-  website: string | null;
   portfolio_images: string[] | null;
   rating: number;
-  total_reviews: number;
-  verified: boolean;
-  featured: boolean;
+  review_count: number;
   created_at: string;
   updated_at: string;
 };
@@ -72,16 +67,11 @@ export default function PiercersPage() {
             city: "São Paulo",
             state: "SP",
             country: "Brasil",
-            phone: "(11) 99999-9999",
-            instagram: "joanafakepiercing",
-            website: "https://joanafakepiercing.com.br",
             portfolio_images: [
               "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
             ],
             rating: 4.9,
-            total_reviews: 48,
-            verified: true,
-            featured: true,
+            review_count: 48,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }
@@ -143,31 +133,19 @@ export default function PiercersPage() {
     ));
   };
 
-  const PiercerCard = ({ piercer, isDetailed = false }: { piercer: Piercer, isDetailed?: boolean }) => (
-    <Card className={`${isDetailed ? 'relative overflow-hidden' : ''}`}>
-      {isDetailed && piercer.featured && (
-        <Badge className="absolute top-4 right-4 bg-yellow-500">
-          <Star className="w-3 h-3 mr-1" />
-          Destaque
-        </Badge>
-      )}
-      
+  const PiercerCard = ({ piercer }: { piercer: Piercer }) => (
+    <Card>
       <CardHeader className="text-center pb-4">
         <div className="relative mx-auto mb-4">
-          <Avatar className={`${isDetailed ? 'w-24 h-24' : 'w-16 h-16'} mx-auto border-4 border-white shadow-lg`}>
+          <Avatar className="w-16 h-16 mx-auto border-4 border-white shadow-lg">
             <AvatarImage src={piercer.portfolio_images?.[0]} alt={piercer.name} />
             <AvatarFallback className="text-lg font-bold">
               {piercer.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
-          {piercer.verified && (
-            <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-              <Verified className="w-4 h-4 text-white" />
-            </div>
-          )}
         </div>
         
-        <CardTitle className={`${isDetailed ? 'text-xl' : 'text-lg'} font-bold`}>
+        <CardTitle className="text-lg font-bold">
           {piercer.name}
         </CardTitle>
         
@@ -188,7 +166,7 @@ export default function PiercersPage() {
             <div className="flex items-center justify-center gap-2">
               <div className="flex">{renderStars(piercer.rating)}</div>
               <span className="text-sm">
-                {piercer.rating.toFixed(1)} ({piercer.total_reviews} avaliações)
+                {piercer.rating.toFixed(1)} ({piercer.review_count} avaliações)
               </span>
             </div>
           )}
@@ -206,60 +184,19 @@ export default function PiercersPage() {
           <div>
             <p className="text-sm font-medium mb-2">Especialidades:</p>
             <div className="flex flex-wrap gap-1">
-              {piercer.specialties.slice(0, isDetailed ? 6 : 3).map((specialty, index) => (
+              {piercer.specialties.slice(0, 3).map((specialty, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {specialty}
                 </Badge>
               ))}
-              {piercer.specialties.length > (isDetailed ? 6 : 3) && (
+              {piercer.specialties.length > 3 && (
                 <Badge variant="outline" className="text-xs">
-                  +{piercer.specialties.length - (isDetailed ? 6 : 3)}
+                  +{piercer.specialties.length - 3}
                 </Badge>
               )}
             </div>
           </div>
         )}
-        
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Contato:</p>
-          <div className="grid grid-cols-2 gap-2">
-            {piercer.phone && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => window.open(`tel:${piercer.phone}`, '_self')}
-              >
-                <Phone className="w-4 h-4" />
-                <span className="text-xs">{piercer.phone}</span>
-              </Button>
-            )}
-            
-            {piercer.instagram && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => window.open(`https://instagram.com/${piercer.instagram}`, '_blank')}
-              >
-                <Instagram className="w-4 h-4" />
-                <span className="text-xs">@{piercer.instagram}</span>
-              </Button>
-            )}
-            
-            {piercer.website && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="flex items-center gap-2 col-span-2"
-                onClick={() => window.open(piercer.website!, '_blank')}
-              >
-                <Globe className="w-4 h-4" />
-                <span className="text-xs">Website</span>
-              </Button>
-            )}
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -344,18 +281,6 @@ export default function PiercersPage() {
           </Button>
         </div>
 
-        {/* Featured Piercers */}
-        {filteredPiercers.some(p => p.featured) && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Piercers em Destaque</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPiercers.filter(piercer => piercer.featured).map((piercer) => (
-                <PiercerCard key={piercer.id} piercer={piercer} isDetailed={true} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* All Piercers */}
         <div>
           <h2 className="text-2xl font-bold mb-6">
@@ -368,7 +293,7 @@ export default function PiercersPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredPiercers.filter(piercer => !piercer.featured).map((piercer) => (
+              {filteredPiercers.map((piercer) => (
                 <PiercerCard key={piercer.id} piercer={piercer} />
               ))}
             </div>
