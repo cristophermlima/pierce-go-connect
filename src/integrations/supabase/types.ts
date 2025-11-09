@@ -185,6 +185,7 @@ export type Database = {
           created_at: string | null
           environment_rating: number | null
           event_id: string | null
+          event_name: string | null
           id: string
           images: string[] | null
           organization_rating: number | null
@@ -201,6 +202,7 @@ export type Database = {
           created_at?: string | null
           environment_rating?: number | null
           event_id?: string | null
+          event_name?: string | null
           id?: string
           images?: string[] | null
           organization_rating?: number | null
@@ -217,6 +219,7 @@ export type Database = {
           created_at?: string | null
           environment_rating?: number | null
           event_id?: string | null
+          event_name?: string | null
           id?: string
           images?: string[] | null
           organization_rating?: number | null
