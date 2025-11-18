@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/sonner";
 
 interface LoginFormProps {
   isLoading: boolean;
@@ -45,7 +46,17 @@ export default function LoginForm({ isLoading, setIsLoading, formErrors, setForm
     
     try {
       const { error } = await signIn(email, password);
-      if (error) throw error;
+      if (error) {
+        // Mostrar mensagem de erro amigável
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Email ou senha incorretos. Verifique suas credenciais.");
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error("Por favor, confirme seu email antes de fazer login.");
+        } else {
+          toast.error("Erro ao fazer login. Tente novamente.");
+        }
+        throw error;
+      }
     } catch (error: any) {
       console.error('Login error:', error);
     } finally {
