@@ -25,6 +25,7 @@ import PiercersPage from "@/pages/PiercersPage";
 import AddPiercerPage from "@/pages/AddPiercerPage";
 import LearningPage from "@/pages/LearningPage";
 import AddLearningResourcePage from "@/pages/AddLearningResourcePage";
+import LearningResourceDetailPage from "@/pages/LearningResourceDetailPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SuccessPage from "@/pages/SuccessPage";
 import NotFound from "@/pages/NotFound";
@@ -74,6 +75,7 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/aprender" element={<LearningPage />} />
+              <Route path="/aprender/:id" element={<LearningResourceDetailPage />} />
               <Route path="/aprender/adicionar" element={
                 <ProtectedRoute>
                   <AddLearningResourcePage />

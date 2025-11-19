@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { toast } from "@/components/ui/sonner";
 
 export default function EventDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
@@ -216,12 +217,15 @@ export default function EventDetailPage() {
                         </div>
                         
                         <div className="space-y-2">
-                          <Button variant="outline" className="w-full text-sm h-8">Ver Airbnb</Button>
-                          <Button variant="outline" className="w-full text-sm h-8">Hotéis Próximos</Button>
-                          <Button variant="outline" className="w-full text-sm h-8">Buscar Voos</Button>
+                          <Button variant="outline" className="w-full text-sm h-8" onClick={() => navigate('/viagens#hospedagem')}>Ver Hospedagens</Button>
+                          <Button variant="outline" className="w-full text-sm h-8" onClick={() => navigate('/viagens#hospedagem')}>Hotéis Próximos</Button>
+                          <Button variant="outline" className="w-full text-sm h-8" onClick={() => navigate('/viagens#voos')}>Buscar Voos</Button>
                         </div>
                         
-                        <Button className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                        <Button 
+                          className="w-full bg-gradient-to-r from-piercing-purple to-piercing-pink"
+                          onClick={() => navigate('/viagens')}
+                        >
                           Planejar Minha Viagem
                         </Button>
                       </div>

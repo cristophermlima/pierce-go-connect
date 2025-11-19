@@ -51,7 +51,6 @@ export default function PiercersPage() {
       const { data, error } = await supabase
         .from('piercers')
         .select('*')
-        .order('featured', { ascending: false })
         .order('rating', { ascending: false });
 
       if (error) throw error;

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MainLayout from "@/components/MainLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Book, Play, Search, Star, ExternalLink, Clock, FileText, Users, Award } from "lucide-react";
+import { Book, Play, Search, Star, Clock, FileText, Users, Award } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
 type LearningResource = {
@@ -177,10 +177,9 @@ export default function LearningPage() {
         
         <Button 
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-          onClick={() => resource.url && window.open(resource.url, '_blank')}
+          onClick={() => navigate(`/aprender/${resource.id}`)}
         >
           Ver Mais
-          <ExternalLink className="w-4 h-4 ml-2" />
         </Button>
       </CardContent>
     </Card>
