@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ type Piercer = {
 };
 
 export default function PiercersPage() {
+  const navigate = useNavigate();
   const [piercers, setPiercers] = useState<Piercer[]>([]);
   const [filteredPiercers, setFilteredPiercers] = useState<Piercer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,31 +56,108 @@ export default function PiercersPage() {
 
       if (error) throw error;
 
-      // Se não houver piercers cadastrados, adiciona um fictício apenas para ilustração visual
-      if (!data || data.length === 0) {
-        setPiercers([
-          {
-            id: "ficticio-1",
-            user_id: null,
-            name: "Joana Fictícia",
-            bio: "Especialista em perfurações de orelha, nariz e boca. Mais de 10 anos de experiência em studios renomados.",
-            experience_years: 10,
-            specialties: ["Orelha", "Nariz", "Microdermal", "Industrial"],
-            city: "São Paulo",
-            state: "SP",
-            country: "Brasil",
-            portfolio_images: [
-              "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80"
-            ],
-            rating: 4.9,
-            review_count: 48,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        ]);
-      } else {
-        setPiercers(data);
-      }
+      // Adiciona piercers fictícios para demonstração
+      const mockPiercers = [
+        {
+          id: "mock-1",
+          user_id: null,
+          name: "Ana Silva",
+          bio: "Especialista em piercings de orelha e nariz com 8 anos de experiência. Certificada em técnicas avançadas de perfuração.",
+          experience_years: 8,
+          specialties: ["Orelha", "Nariz", "Helix", "Tragus"],
+          city: "São Paulo",
+          state: "SP",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80"],
+          rating: 4.9,
+          review_count: 127,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-2",
+          user_id: null,
+          name: "Carlos Mendes",
+          bio: "Piercer profissional especializado em piercings faciais e corporais. Apaixonado por body art e segurança.",
+          experience_years: 12,
+          specialties: ["Septum", "Medusa", "Industrial", "Microdermal"],
+          city: "Rio de Janeiro",
+          state: "RJ",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80"],
+          rating: 5.0,
+          review_count: 93,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-3",
+          user_id: null,
+          name: "Mariana Costa",
+          bio: "Body piercer com foco em piercings delicados e minimalistas. Técnicas modernas e ambiente acolhedor.",
+          experience_years: 6,
+          specialties: ["Orelha", "Conch", "Daith", "Rook"],
+          city: "Belo Horizonte",
+          state: "MG",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=300&q=80"],
+          rating: 4.8,
+          review_count: 64,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-4",
+          user_id: null,
+          name: "Roberto Alves",
+          bio: "Especialista em piercings complexos e personalizados. Atendimento individualizado e materiais de primeira linha.",
+          experience_years: 15,
+          specialties: ["Industrial", "Surface", "Dermal Anchor", "Snake Bites"],
+          city: "Curitiba",
+          state: "PR",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80"],
+          rating: 4.9,
+          review_count: 156,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-5",
+          user_id: null,
+          name: "Juliana Santos",
+          bio: "Body piercer certificada com expertise em anatomia e técnicas de cicatrização. Ambiente seguro e higiênico.",
+          experience_years: 9,
+          specialties: ["Septum", "Nostril", "Labret", "Bridge"],
+          city: "Porto Alegre",
+          state: "RS",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80"],
+          rating: 4.7,
+          review_count: 82,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-6",
+          user_id: null,
+          name: "Pedro Oliveira",
+          bio: "Piercer profissional com anos de experiência em eventos e convenções. Especializado em piercings genitais e faciais.",
+          experience_years: 11,
+          specialties: ["Prince Albert", "Nipple", "VCH", "Eyebrow"],
+          city: "Salvador",
+          state: "BA",
+          country: "Brasil",
+          portfolio_images: ["https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80"],
+          rating: 5.0,
+          review_count: 118,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      ];
+
+      // Se houver dados reais, mescla com os fictícios
+      setPiercers(data && data.length > 0 ? [...data, ...mockPiercers] : mockPiercers);
     } catch (error) {
       console.error('Error fetching piercers:', error);
       toast.error("Erro ao carregar piercers");
@@ -214,13 +293,21 @@ export default function PiercersPage() {
   return (
     <MainLayout>
       <div className="container py-10">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">
-            Catálogo de <span className="text-gradient">Piercers</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Encontre piercers qualificados na sua cidade ou descubra profissionais em outras regiões
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-4">
+              Catálogo de <span className="text-gradient">Piercers</span>
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Encontre piercers qualificados na sua cidade ou descubra profissionais em outras regiões
+            </p>
+          </div>
+          <Button 
+            onClick={() => navigate('/piercers/cadastrar')}
+            className="bg-gradient-to-r from-piercing-purple to-piercing-pink whitespace-nowrap"
+          >
+            Cadastrar Perfil
+          </Button>
         </div>
 
         {/* Filters */}

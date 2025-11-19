@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ type LearningResource = {
 };
 
 export default function LearningPage() {
+  const navigate = useNavigate();
   const [resources, setResources] = useState<LearningResource[]>([]);
   const [filteredResources, setFilteredResources] = useState<LearningResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,72 @@ export default function LearningPage() {
 
       if (error) throw error;
 
-      setResources(data || []);
+      // Adiciona recursos fictícios para demonstração
+      const mockResources: LearningResource[] = [
+        {
+          id: "mock-1",
+          title: "Curso Completo de Body Piercing Profissional",
+          description: "Aprenda todas as técnicas essenciais de perfuração, anatomia, assepsia e cicatrização. Curso certificado com 40 horas de conteúdo prático e teórico.",
+          content_type: "Curso",
+          author: "Ana Silva",
+          url: "https://exemplo.com/curso-body-piercing",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-2",
+          title: "E-book: Guia Completo de Joias para Piercing",
+          description: "Conheça os diferentes tipos de joias, materiais seguros, tamanhos e como escolher a joia ideal para cada perfuração. Inclui guia de fornecedores confiáveis.",
+          content_type: "E-book",
+          author: "Carlos Mendes",
+          url: "https://exemplo.com/ebook-joias",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-3",
+          title: "Workshop: Piercings Faciais Avançados",
+          description: "Workshop intensivo de 2 dias focado em piercings faciais complexos: bridge, dermal anchor, microdermal e técnicas avançadas de perfuração.",
+          content_type: "Workshop",
+          author: "Mariana Costa",
+          url: "https://exemplo.com/workshop-faciais",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-4",
+          title: "Certificação Internacional em Body Piercing",
+          description: "Programa completo de certificação reconhecido internacionalmente. Aprenda anatomia, microbiologia, técnicas de perfuração e gestão de estúdio.",
+          content_type: "Certificação",
+          author: "Roberto Alves",
+          url: "https://exemplo.com/certificacao",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-5",
+          title: "E-book: Segurança e Assepsia no Body Piercing",
+          description: "Manual completo sobre protocolos de segurança, esterilização, autoclave, descarte de materiais e prevenção de infecções.",
+          content_type: "E-book",
+          author: "Juliana Santos",
+          url: "https://exemplo.com/ebook-seguranca",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: "mock-6",
+          title: "Curso: Marketing Digital para Piercers",
+          description: "Aprenda a promover seu trabalho nas redes sociais, criar portfólio profissional, atrair clientes e construir sua marca pessoal.",
+          content_type: "Curso",
+          author: "Pedro Oliveira",
+          url: "https://exemplo.com/curso-marketing",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      ];
+
+      // Mescla dados reais com fictícios
+      setResources(data && data.length > 0 ? [...data, ...mockResources] : mockResources);
     } catch (error) {
       console.error('Error fetching learning resources:', error);
       toast.error("Erro ao carregar recursos de aprendizado");
@@ -133,13 +200,23 @@ export default function LearningPage() {
     <MainLayout>
       <div className="container py-10">
         {/* Hero Section */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            Centro de <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Aprendizado</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-            Transforme sua carreira com os melhores cursos e e-books de body piercing do mercado
-          </p>
+        <div className="mb-12">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-4">
+                Centro de <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Aprendizado</span>
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl">
+                Transforme sua carreira com os melhores cursos e e-books de body piercing do mercado
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/aprender/adicionar')}
+              className="bg-gradient-to-r from-piercing-purple to-piercing-pink whitespace-nowrap"
+            >
+              Adicionar Recurso
+            </Button>
+          </div>
           <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-purple-600" />

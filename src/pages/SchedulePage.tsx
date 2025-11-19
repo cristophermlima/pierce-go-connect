@@ -70,7 +70,8 @@ export default function SchedulePage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">Minha Agenda</h1>
               <p className="text-muted-foreground">
-                Acompanhe seus eventos, workshops e compromissos profissionais
+                Organize seus eventos, cursos, viagens e compromissos profissionais em um só lugar. 
+                Salve eventos da plataforma, adicione suas viagens, workshops e muito mais.
               </p>
             </div>
             <Button 
