@@ -89,7 +89,7 @@ export default function TravelPage() {
                   </div>
                   
                   <div className="flex justify-center mt-4">
-                    <Button className="bg-gradient-to-r from-piercing-purple to-piercing-pink px-8">Buscar Hospedagem</Button>
+                    <Button className="bg-gradient-to-r from-piercing-purple to-piercing-pink px-8" onClick={() => window.open('https://www.booking.com', '_blank')}>Buscar Hospedagem</Button>
                   </div>
                 </TabsContent>
                 
@@ -132,7 +132,7 @@ export default function TravelPage() {
                   </div>
                   
                   <div className="flex justify-center mt-4">
-                    <Button className="bg-gradient-to-r from-piercing-purple to-piercing-pink px-8">Buscar Voos</Button>
+                    <Button className="bg-gradient-to-r from-piercing-purple to-piercing-pink px-8" onClick={() => window.open('https://www.google.com/flights', '_blank')}>Buscar Voos</Button>
                   </div>
                 </TabsContent>
                 
@@ -239,7 +239,7 @@ function HotelCard({ name, image, distance, rating, reviews, discount, price }: 
             <div>
               <span className="font-bold">BRL {price}</span> / noite
             </div>
-            <Button variant="outline" size="sm">Ver Detalhes</Button>
+            <Button variant="outline" size="sm" onClick={() => window.open('https://www.booking.com', '_blank')}>Ver Detalhes</Button>
           </div>
         </div>
       </div>

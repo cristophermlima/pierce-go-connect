@@ -22,7 +22,9 @@ import TravelPage from "@/pages/TravelPage";
 import SubmitPage from "@/pages/SubmitPage";
 import PlansPage from "@/pages/PlansPage";
 import PiercersPage from "@/pages/PiercersPage";
+import AddPiercerPage from "@/pages/AddPiercerPage";
 import LearningPage from "@/pages/LearningPage";
+import AddLearningResourcePage from "@/pages/AddLearningResourcePage";
 import ProfilePage from "@/pages/ProfilePage";
 import SuccessPage from "@/pages/SuccessPage";
 import NotFound from "@/pages/NotFound";
@@ -66,7 +68,17 @@ function App() {
               {/* FAQ – Dúvidas frequentes sobre assinaturas */}
               <Route path="/faq-assinaturas" element={<FAQAssinaturasPage />} />
               <Route path="/piercers" element={<PiercersPage />} />
+              <Route path="/piercers/cadastrar" element={
+                <ProtectedRoute>
+                  <AddPiercerPage />
+                </ProtectedRoute>
+              } />
               <Route path="/aprender" element={<LearningPage />} />
+              <Route path="/aprender/adicionar" element={
+                <ProtectedRoute>
+                  <AddLearningResourcePage />
+                </ProtectedRoute>
+              } />
               <Route path="/sucesso" element={<SuccessPage />} />
               
               {/* Protected Routes */}
