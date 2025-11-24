@@ -37,6 +37,10 @@ export default {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))"
         },
+        ecosystem: {
+          DEFAULT: "hsl(var(--ecosystem))",
+          foreground: "hsl(var(--ecosystem-foreground))"
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))"
