@@ -33,44 +33,36 @@ const defaultAds: Ad[] = [
 
 export default function AdCarousel({ ads = defaultAds }: AdCarouselProps) {
   return (
-    <div className="w-full bg-muted/30 py-4">
-      <div className="container">
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {ads.map((ad) => (
-              <CarouselItem key={ad.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                <Card className="overflow-hidden border-0 shadow-lg">
-                  <a 
-                    href={ad.link || "#"} 
-                    className="block aspect-[16/9] overflow-hidden relative group"
-                    target={ad.link ? "_blank" : undefined}
-                    rel={ad.link ? "noopener noreferrer" : undefined}
-                  >
-                    <img 
-                      src={ad.image} 
-                      alt={ad.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-white text-sm font-medium">{ad.title}</p>
-                      </div>
-                    </div>
-                  </a>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
-      </div>
+    <div className="w-full bg-background">
+      <Carousel
+        opts={{
+          align: "center",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {ads.map((ad) => (
+            <CarouselItem key={ad.id} className="basis-full">
+              <a 
+                href={ad.link || "#"} 
+                className="block aspect-[21/9] md:aspect-[32/9] overflow-hidden relative group"
+                target={ad.link ? "_blank" : undefined}
+                rel={ad.link ? "noopener noreferrer" : undefined}
+              >
+                <img 
+                  src={ad.image} 
+                  alt={ad.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </a>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="left-4 h-12 w-12 border-2 bg-background/80 backdrop-blur-sm hover:bg-background" />
+        <CarouselNext className="right-4 h-12 w-12 border-2 bg-background/80 backdrop-blur-sm hover:bg-background" />
+      </Carousel>
     </div>
   );
 }
