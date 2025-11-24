@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import MainLayout from "@/components/MainLayout";
+import AdCarousel from "@/components/AdCarousel";
 import { Calendar, MapPin, Users, Zap, BookOpen, Crown } from "lucide-react";
 
 export default function Index() {
   return (
     <MainLayout>
+      {/* Advertisement Carousel */}
+      <AdCarousel />
+      
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-piercing-purple/10 via-transparent to-piercing-pink/10" />

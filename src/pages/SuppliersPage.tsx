@@ -7,6 +7,7 @@ import AddEvaluationForm from "@/components/AddEvaluationForm";
 import { SuppliersHeader } from "@/components/suppliers/SuppliersHeader";
 import { SuppliersFilters } from "@/components/suppliers/SuppliersFilters";
 import { SuppliersList } from "@/components/suppliers/SuppliersList";
+import AdCarousel from "@/components/AdCarousel";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 
@@ -88,6 +89,7 @@ export default function SuppliersPage() {
 
   return (
     <MainLayout>
+      <AdCarousel />
       <SuppliersHeader />
       
       <SuppliersFilters 
