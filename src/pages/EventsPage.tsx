@@ -3,6 +3,7 @@ import MainLayout from "@/components/MainLayout";
 import EventsHeader from "@/components/events/EventsHeader";
 import EventsFilters from "@/components/events/EventsFilters";
 import EventsGrid from "@/components/events/EventsGrid";
+import AdCarousel from "@/components/AdCarousel";
 import { useState } from "react";
 
 // Mock data for events
@@ -64,8 +65,9 @@ export default function EventsPage() {
 
   return (
     <MainLayout>
+      <AdCarousel />
       <EventsHeader />
-      <EventsFilters 
+      <EventsFilters
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}

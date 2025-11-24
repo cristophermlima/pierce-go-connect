@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -8,13 +8,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AddEventPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -32,6 +36,38 @@ export default function AddEventPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione uma imagem válida");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setImageFile(file);
+    
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file);
+    handleInputChange("image", previewUrl);
+    toast.success("Imagem selecionada com sucesso!");
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    handleInputChange("image", "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleNextStep = () => {
@@ -209,15 +245,45 @@ export default function AddEventPage() {
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Imagem do Evento</label>
-                      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                        <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Escolha arquivo. Nenhum arquivo escolhido
-                        </p>
-                        <Button variant="outline" type="button">
-                          Selecionar Arquivo
-                        </Button>
-                      </div>
+                      {formData.image ? (
+                        <div className="relative border-2 border-border rounded-lg overflow-hidden">
+                          <img 
+                            src={formData.image} 
+                            alt="Preview" 
+                            className="w-full h-64 object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2"
+                            onClick={removeImage}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {imageFile ? imageFile.name : "Nenhum arquivo escolhido"}
+                          </p>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                          />
+                          <Button 
+                            variant="outline" 
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            Selecionar Arquivo
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
