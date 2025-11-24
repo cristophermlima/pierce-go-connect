@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.png";
 import { 
   NavigationMenu, 
   NavigationMenuList, 
@@ -62,8 +63,8 @@ export default function Navbar() {
     >
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center font-bold text-2xl text-foreground">
-          <span className="text-gradient">PiercerGo</span>
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="PiercerGo" className="h-12 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -266,7 +267,7 @@ export default function Navbar() {
                 </Button>
               </Link>
               <Link to="/cadastrar" className="hidden sm:block">
-                <Button size="sm" className="bg-gradient-to-r from-piercing-purple to-piercing-pink">
+                <Button size="sm" className="bg-ecosystem hover:bg-ecosystem/90">
                   Cadastrar
                 </Button>
               </Link>

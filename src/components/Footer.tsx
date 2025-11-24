@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import logo from "@/assets/logo.png";
 import { toast } from "@/components/ui/sonner";
 
 export default function Footer() {
@@ -22,10 +23,10 @@ export default function Footer() {
       <div className="container grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-6">
         <div>
           <Link to="/" className="inline-block mb-4">
-            <span className="text-2xl font-bold text-gradient">Piercer Go</span>
+            <img src={logo} alt="PiercerGo" className="h-16 w-auto" />
           </Link>
           <p className="text-sm text-muted-foreground mb-4">
-            A plataforma para a comunidade de body piercing conectar-se, descobrir eventos e compartilhar experiências.
+            A rede social para a comunidade de body piercing conectar-se, descobrir eventos e compartilhar experiências.
           </p>
           <div className="flex space-x-4">
             <a href="#" className="text-muted-foreground hover:text-primary">
