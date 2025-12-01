@@ -49,10 +49,10 @@ export default function ProfilePage() {
     try {
       setUploadingAvatar(true);
 
-      // Create bucket if it doesn't exist (this will be handled by migrations)
+      // Upload file with user ID in path for RLS
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
