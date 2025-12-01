@@ -35,6 +35,7 @@ import AdminPage from "@/pages/AdminPage";
 import AdminUsersPage from "@/pages/AdminUsersPage";
 import AdminEventsPage from "@/pages/AdminEventsPage";
 import AdminSuppliersPage from "@/pages/AdminSuppliersPage";
+import AddSupplierPage from "@/pages/AddSupplierPage";
 import SupplierDashboardPage from "@/pages/SupplierDashboardPage";
 import OrganizerDashboardPage from "@/pages/OrganizerDashboardPage";
 import FAQAssinaturasPage from "@/pages/FAQAssinaturasPage";
@@ -134,6 +135,11 @@ function App() {
               <Route path="/admin/fornecedores" element={
                 <ProtectedRoute>
                   <AdminSuppliersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/fornecedores/adicionar" element={
+                <ProtectedRoute>
+                  <AddSupplierPage />
                 </ProtectedRoute>
               } />
               
