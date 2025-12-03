@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Card } from "@/components/ui/card";
 
 interface Ad {
   id: string;
-  image: string;
+  image?: string;
   title: string;
+  description?: string;
   link?: string;
 }
 
@@ -16,18 +15,18 @@ interface AdCarouselProps {
 const defaultAds: Ad[] = [
   {
     id: "1",
-    image: "https://images.unsplash.com/photo-1622298760148-0f9c81f4a101?q=80&w=2070&auto=format&fit=crop",
-    title: "Anúncio 1 - Espaço Disponível",
+    title: "📢 Divulgue seu evento aqui!",
+    description: "Entre em contato e anuncie para milhares de piercers",
   },
   {
     id: "2",
-    image: "https://images.unsplash.com/photo-1612371636004-04df25c9f51d?q=80&w=2070&auto=format&fit=crop",
-    title: "Anúncio 2 - Espaço Disponível",
+    title: "🎯 Espaço para publicidade",
+    description: "Alcance seu público-alvo na comunidade de piercing",
   },
   {
     id: "3",
-    image: "https://images.unsplash.com/photo-1581743525371-1d03b65cebb2?q=80&w=2071&auto=format&fit=crop",
-    title: "Anúncio 3 - Espaço Disponível",
+    title: "✨ Anuncie sua marca",
+    description: "Conecte-se com profissionais do body piercing",
   },
 ];
 
@@ -50,12 +49,27 @@ export default function AdCarousel({ ads = defaultAds }: AdCarouselProps) {
                 target={ad.link ? "_blank" : undefined}
                 rel={ad.link ? "noopener noreferrer" : undefined}
               >
-                <img 
-                  src={ad.image} 
-                  alt={ad.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {ad.image ? (
+                  <>
+                    <img 
+                      src={ad.image} 
+                      alt={ad.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-muted via-muted/80 to-muted flex flex-col items-center justify-center border-2 border-dashed border-border/50 transition-all duration-300 group-hover:border-primary/50 group-hover:bg-muted/90">
+                    <h3 className="text-2xl md:text-4xl font-bold text-foreground mb-2 transition-colors group-hover:text-primary">
+                      {ad.title}
+                    </h3>
+                    {ad.description && (
+                      <p className="text-sm md:text-lg text-muted-foreground text-center px-4">
+                        {ad.description}
+                      </p>
+                    )}
+                  </div>
+                )}
               </a>
             </CarouselItem>
           ))}

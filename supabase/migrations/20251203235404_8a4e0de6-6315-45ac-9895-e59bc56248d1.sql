@@ -1,0 +1,1 @@
+DELETE FROM reviews WHERE id = '91dccf58-6f4d-4f2d-99ba-c7919a892c73';
