@@ -66,7 +66,6 @@ export default function PiercersPage() {
 
       // Converte perfis em formato de piercer para exibição
       const profilesAsPiercers: Piercer[] = (profilesData || [])
-        .filter(profile => profile.full_name && profile.full_name.trim() !== '')
         .map(profile => ({
           id: `profile-${profile.id}`,
           user_id: profile.id,
