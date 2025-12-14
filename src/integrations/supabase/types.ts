@@ -147,6 +147,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           is_event_organizer: boolean | null
+          is_piercer: boolean | null
           is_supplier: boolean | null
           state: string | null
           updated_at: string | null
@@ -160,6 +161,7 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           is_event_organizer?: boolean | null
+          is_piercer?: boolean | null
           is_supplier?: boolean | null
           state?: string | null
           updated_at?: string | null
@@ -173,6 +175,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           is_event_organizer?: boolean | null
+          is_piercer?: boolean | null
           is_supplier?: boolean | null
           state?: string | null
           updated_at?: string | null

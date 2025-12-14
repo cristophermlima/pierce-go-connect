@@ -56,11 +56,11 @@ export default function PiercersPage() {
 
       if (piercersError) throw piercersError;
 
-      // Também busca os perfis de usuários para mostrar na comunidade
+      // Também busca os perfis marcados como piercers
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name, city, state, country, avatar_url')
-        .not('full_name', 'is', null);
+        .eq('is_piercer', true);
 
       if (profilesError) throw profilesError;
 
