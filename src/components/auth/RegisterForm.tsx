@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface RegisterFormProps {
   isLoading: boolean;
@@ -13,9 +14,18 @@ interface RegisterFormProps {
     password?: string;
     name?: string;
     city?: string;
+    profileType?: string;
   };
   setFormErrors: (errors: any) => void;
 }
+
+const PROFILE_TYPES = [
+  { value: "piercer_individual", label: "Piercer Individual" },
+  { value: "piercing_shop", label: "Loja de Piercing" },
+  { value: "piercing_tattoo_studio", label: "Estúdio de Piercing e Tatuagem" },
+  { value: "supplier", label: "Fornecedor de Joias e Materiais" },
+  { value: "event_promoter", label: "Promotor de Eventos" },
+];
 
 export default function RegisterForm({ isLoading, setIsLoading, formErrors, setFormErrors }: RegisterFormProps) {
   const { signUp } = useAuth();
@@ -24,6 +34,7 @@ export default function RegisterForm({ isLoading, setIsLoading, formErrors, setF
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [profileType, setProfileType] = useState("");
 
   const validateForm = () => {
     const errors: {
@@ -31,6 +42,7 @@ export default function RegisterForm({ isLoading, setIsLoading, formErrors, setF
       password?: string;
       name?: string;
       city?: string;
+      profileType?: string;
     } = {};
 
     if (!email) errors.email = "Email é obrigatório";
@@ -41,6 +53,7 @@ export default function RegisterForm({ isLoading, setIsLoading, formErrors, setF
 
     if (!name) errors.name = "Nome é obrigatório";
     if (!city) errors.city = "Cidade é obrigatória";
+    if (!profileType) errors.profileType = "Selecione o tipo de perfil";
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -54,7 +67,11 @@ export default function RegisterForm({ isLoading, setIsLoading, formErrors, setF
     setIsLoading(true);
     
     try {
-      const { error } = await signUp(email, password, { fullName: name, city });
+      const { error } = await signUp(email, password, { 
+        fullName: name, 
+        city,
+        profileType 
+      });
       if (error) throw error;
     } catch (error: any) {
       console.error('Register error:', error);
@@ -92,6 +109,27 @@ export default function RegisterForm({ isLoading, setIsLoading, formErrors, setF
         />
         {formErrors.city && (
           <p className="text-red-500 text-sm">{formErrors.city}</p>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <Label>Tipo de perfil</Label>
+        <RadioGroup
+          value={profileType}
+          onValueChange={setProfileType}
+          className="space-y-2"
+        >
+          {PROFILE_TYPES.map((type) => (
+            <div key={type.value} className="flex items-center space-x-3">
+              <RadioGroupItem value={type.value} id={type.value} />
+              <Label htmlFor={type.value} className="font-normal cursor-pointer">
+                {type.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        {formErrors.profileType && (
+          <p className="text-red-500 text-sm">{formErrors.profileType}</p>
         )}
       </div>
       
