@@ -56,11 +56,12 @@ export default function PiercersPage() {
 
       if (piercersError) throw piercersError;
 
-      // Também busca os perfis marcados como piercers
+      // Também busca os perfis marcados como piercers COM CERTIFICADO APROVADO
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, city, state, country, avatar_url')
-        .eq('is_piercer', true);
+        .select('id, full_name, city, state, country, avatar_url, certificate_status')
+        .eq('is_piercer', true)
+        .eq('certificate_status', 'approved');
 
       if (profilesError) throw profilesError;
 
