@@ -12,6 +12,8 @@ type UserProfile = {
   avatar_url: string | null;
   is_event_organizer: boolean;
   is_supplier: boolean;
+  is_piercer: boolean;
+  profile_type: string | null;
 };
 
 type AuthContextType = {
@@ -147,45 +149,66 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: userData
+          data: {
+            full_name: userData?.fullName,
+            city: userData?.city,
+            profile_type: userData?.profileType
+          }
         }
       });
       
       if (!error) {
         toast.success("Cadastro realizado com sucesso! Verifique seu email para confirmação.");
-        // Inserir na tabela 'piercers' automaticamente
-        // Esperar o profile ser criado via trigger - depois inserir piercer, caso ainda não exista
+        
+        // Atualizar perfil com tipo e flags após criação
         setTimeout(async () => {
           const { data: userRecord } = await supabase.auth.getUser();
           const userId = userRecord?.user?.id;
-          if (userId) {
-            // Buscar perfil para obter nome completo e cidade
-            const { data: profile } = await supabase
+          if (userId && userData?.profileType) {
+            // Determinar flags baseado no tipo de perfil
+            const isPiercer = ['piercer_individual', 'piercing_shop', 'piercing_tattoo_studio'].includes(userData.profileType);
+            const isSupplier = userData.profileType === 'supplier';
+            const isEventOrganizer = userData.profileType === 'event_promoter';
+
+            // Atualizar perfil com tipo e flags
+            await supabase
               .from('profiles')
-              .select('full_name, city')
-              .eq('id', userId)
-              .single();
+              .update({
+                profile_type: userData.profileType,
+                is_piercer: isPiercer,
+                is_supplier: isSupplier,
+                is_event_organizer: isEventOrganizer
+              })
+              .eq('id', userId);
 
-            // Inserir piercer somente se não existir já (previne duplicação)
-            const { data: existingPiercer } = await supabase
-              .from('piercers')
-              .select('id')
-              .eq('user_id', userId)
-              .maybeSingle();
+            // Inserir piercer somente se for um tipo de piercer
+            if (isPiercer) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name, city')
+                .eq('id', userId)
+                .single();
 
-            if (!existingPiercer && profile) {
-              await supabase.from('piercers').insert({
-                user_id: userId,
-                name: profile.full_name ?? "Nome",
-                city: profile.city ?? "",
-                state: "",
-                country: "Brasil",
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              });
+              const { data: existingPiercer } = await supabase
+                .from('piercers')
+                .select('id')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+              if (!existingPiercer && profile) {
+                await supabase.from('piercers').insert({
+                  user_id: userId,
+                  name: profile.full_name ?? "Nome",
+                  city: profile.city ?? "",
+                  state: "",
+                  country: "Brasil",
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                });
+              }
             }
           }
-        }, 1200); // Pequeno delay: aguardar profile via trigger
+        }, 1200);
       }
       
       return { error };
