@@ -1,10 +1,11 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
+import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginFormProps {
   isLoading: boolean;
@@ -20,6 +21,8 @@ export default function LoginForm({ isLoading, setIsLoading, formErrors, setForm
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const validateForm = () => {
     const errors: {
@@ -64,6 +67,38 @@ export default function LoginForm({ isLoading, setIsLoading, formErrors, setForm
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Por favor, insira seu email primeiro.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Por favor, insira um email válido.");
+      return;
+    }
+
+    setIsResetting(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      });
+
+      if (error) {
+        toast.error("Erro ao enviar email de recuperação. Tente novamente.");
+        console.error('Reset password error:', error);
+      } else {
+        toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+      }
+    } catch (error) {
+      toast.error("Erro ao enviar email de recuperação.");
+      console.error('Reset password error:', error);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -84,18 +119,32 @@ export default function LoginForm({ isLoading, setIsLoading, formErrors, setForm
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Senha</Label>
-          <a href="#" className="text-sm text-primary hover:underline">
-            Esqueceu a senha?
-          </a>
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={isResetting}
+            className="text-sm text-primary hover:underline disabled:opacity-50"
+          >
+            {isResetting ? "Enviando..." : "Esqueceu a senha?"}
+          </button>
         </div>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={formErrors.password ? "border-red-500" : ""}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={`pr-10 ${formErrors.password ? "border-red-500" : ""}`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {formErrors.password && (
           <p className="text-red-500 text-sm">{formErrors.password}</p>
         )}
