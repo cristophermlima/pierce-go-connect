@@ -12,6 +12,7 @@ interface AdminStats {
   totalEvents: number;
   totalSuppliers: number;
   totalReviews: number;
+  pendingCertificates: number;
 }
 
 export default function AdminPage() {
@@ -20,6 +21,7 @@ export default function AdminPage() {
     totalEvents: 0,
     totalSuppliers: 0,
     totalReviews: 0,
+    pendingCertificates: 0,
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -58,11 +60,21 @@ export default function AdminPage() {
           
         if (reviewsError) throw reviewsError;
         
+        // Get pending certificates count
+        const { count: pendingCount, error: pendingError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('certificate_status', 'pending')
+          .not('certificate_url', 'is', null);
+          
+        if (pendingError) throw pendingError;
+        
         setStats({
           totalUsers: usersCount || 0,
           totalEvents: eventsCount || 0,
           totalSuppliers: suppliersCount || 0,
           totalReviews: reviewsCount || 0,
+          pendingCertificates: pendingCount || 0,
         });
       } catch (error) {
         console.error('Error fetching admin stats:', error);
@@ -105,12 +117,51 @@ export default function AdminPage() {
         />
       </div>
       
+      {/* Pending Certificates Alert */}
+      {stats.pendingCertificates > 0 && (
+        <Card className="mb-6 border-yellow-500/50 bg-yellow-500/10">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-500/20 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <path d="m9 15 2 2 4-4"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-yellow-500">Certificados Pendentes</h3>
+                <p className="text-sm text-muted-foreground">
+                  {stats.pendingCertificates} piercer(s) aguardando aprovação de certificado
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => navigate('/admin/usuarios')}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+            >
+              Revisar Agora
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Ações Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/admin/usuarios')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Aprovar Certificados de Piercers
+            </Button>
             <Button 
               variant="outline" 
               className="w-full justify-start"
